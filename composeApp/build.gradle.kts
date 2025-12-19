@@ -46,4 +46,29 @@ kotlin {
     }
 }
 
+// Регистрируем новую задачу "packageGame"
+tasks.register<Zip>("packageGame") {
+    // Описание, чтобы понимать, что это (видно в IDE)
+    group = "distribution"
+    description = "Собирает игру в ZIP архив для Яндекс Игр (без лишних папок)"
+
+    // 1. Сначала говорим Gradle, что перед упаковкой нужно собрать проект
+    // Используем 'jsBrowserDistribution' для JS (или 'wasmJsBrowserDistribution', если ты на Wasm)
+    dependsOn("jsBrowserDistribution")
+
+    // 2. Откуда брать файлы?
+    // Берем из папки, куда Gradle складывает готовую Production версию
+    from(layout.buildDirectory.dir("dist/js/productionExecutable"))
+
+    // 3. Исключаем лишнее (файлы отладки .map весят много и не нужны игроку)
+    exclude("**/*.map")
+
+    // 4. Куда положить готовый архив?
+    // Положим прямо в папку build/
+    destinationDirectory.set(layout.buildDirectory)
+
+    // 5. Как назвать файл?
+    archiveFileName.set("game-release.zip")
+}
+
 
