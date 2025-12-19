@@ -1,7 +1,43 @@
+/* Объявляем шрифт */
+@font-face {
+    font-family: 'RobloxFont'; /* Придумываем имя шрифту */
+    /* Путь идет от расположения styles.css */
+    src: url('font/oofroblox.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    /* Опционально: для лучшего отображения */
+    font-display: swap;
+}
+
 html, body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
+    /* Убираем скроллбары */
     overflow: hidden;
+    /* Темный фон (почти черный) */
+    background-color: #111111;
+    /* Шрифт по умолчанию (без засечек) */
+    font-family: 'RobloxFont', 'Segoe UI', Tahoma, sans-serif;
+}
+
+body {
+    /* Центрирование лоадера (и самой игры, если она не на весь экран) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* ВАЖНО для игр:
+       Отключаем жесты браузера (зум, свайп назад, потягивание вниз) */
+    touch-action: none;
+
+    /* Отключаем выделение текста (синяя подсветка при кликах) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    /* Убираем подсветку при тапе на мобильных (серый квадрат) */
+    -webkit-tap-highlight-color: transparent;
 }
