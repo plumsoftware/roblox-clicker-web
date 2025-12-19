@@ -1,6 +1,12 @@
 package ru.plumsoftware.roblox.clicker.web.ui.entry_app_point
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
 import ru.plumsoftware.roblox.clicker.web.ui.screens.Screen
@@ -21,9 +27,16 @@ fun App() {
         val appState = appViewModel.state.collectAsState()
 
         AppTheme {
-            when (appState.value.currentScreen) {
-                is Screen.Main.Play -> {
-                    MainScreen()
+            if (!appState.value.isYandexReady) {
+                // Показываем экран загрузки (спиннер)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Загружаем ресурсы...", style = MaterialTheme.typography.headlineMedium)
+                }
+            } else {
+                when (appState.value.currentScreen) {
+                    is Screen.Main.Play -> {
+                        MainScreen()
+                    }
                 }
             }
         }

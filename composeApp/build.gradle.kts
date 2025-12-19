@@ -39,6 +39,11 @@ kotlin {
 
             // 3. Базовая библиотека ViewModel от Jetbrains
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
+
+            // Kotlin coroutines
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+//            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.10.2")
+//            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-web:1.10.2")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
