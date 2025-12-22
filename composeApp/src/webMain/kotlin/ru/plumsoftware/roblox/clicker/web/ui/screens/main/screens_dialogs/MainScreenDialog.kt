@@ -1,4 +1,4 @@
-package ru.plumsoftware.roblox.clicker.web.ui.screens.main
+package ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs
 
 sealed interface MainScreenDialog {
 

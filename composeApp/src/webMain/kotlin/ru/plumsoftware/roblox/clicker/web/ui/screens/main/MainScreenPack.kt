@@ -1,5 +1,9 @@
 package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 
+import ru.plumsoftware.roblox.clicker.web.model.GamerData
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
+
 object MainScreenPack {
     sealed interface Event {
         class onSettingsClick : Event
@@ -22,13 +26,19 @@ object MainScreenPack {
     data class MainScreenState(
         val currentScreen: MainScreenScreens,
         val currentMainScreenDialog: MainScreenDialog,
-        val shopScreenName: String
+        val shopScreenName: String,
+
+        val isLoading: Boolean,
+        val gamerData: GamerData,
     ) {
         companion object {
             fun default() = MainScreenState(
                 currentScreen = MainScreenScreens.Shop.HeroShop(),
                 currentMainScreenDialog = MainScreenDialog.Empty,
-                shopScreenName = "персонажи"
+                shopScreenName = "персонажи",
+
+                isLoading = false,
+                gamerData = GamerData()
             )
         }
     }
