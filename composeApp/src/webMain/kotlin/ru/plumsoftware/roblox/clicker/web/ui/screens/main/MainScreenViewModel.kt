@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
+import ru.plumsoftware.roblox.clicker.web.model.GameConfig
+import ru.plumsoftware.roblox.clicker.web.model.GamerData
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
@@ -23,23 +26,45 @@ class MainScreenViewModel : ViewModel() {
     init {
         loadProgress()
         startAutoSave()
+
+        updateCharactersList(state.value.gamerData)
     }
 
     // --- ЛОГИКА ДАННЫХ (ЭКОНОМИКА) ---
-
     private fun loadProgress() {
         viewModelScope.launch {
+            // Ждем инициализации
             while (!YandexGamesManager.isInitialized) {
                 delay(100)
             }
 
             println("MainVM: Loading player data...")
-            val loadedData = YandexGamesManager.loadGame()
+            var loadedData = YandexGamesManager.loadGame()
 
-            if (loadedData != null) {
-                state.update { it.copy(gamerData = loadedData) }
-                println("MainVM: Data loaded! Coins: ${loadedData.coins}")
+            // Если сохранений нет, берем дефолтный GamerData (где уже прописан ID 1)
+            if (loadedData == null) {
+                loadedData = GamerData()
+            } else {
+                // ЗАЩИТА ОТ СТАРЫХ СОХРАНЕНИЙ:
+                // Если вдруг пришел id=0 (старый баг), принудительно ставим 1
+                if (loadedData.selectedSkinId == 0) {
+                    loadedData = loadedData.copy(selectedSkinId = 1)
+                }
+                // Если список купленных пуст (старый баг), добавляем туда 1
+                if (loadedData.unlockedCharacterIds.isEmpty()) {
+                    loadedData = loadedData.copy(unlockedCharacterIds = listOf(1))
+                }
             }
+
+            // Обновляем состояние
+            state.update {
+                it.copy(
+                    gamerData = loadedData,
+                    // Сразу обновляем визуальный список
+                    charactersList = mapDataToCharacters(loadedData)
+                )
+            }
+            println("MainVM: Data loaded! Coins: ${loadedData.coins}")
         }
     }
 
@@ -58,10 +83,87 @@ class MainScreenViewModel : ViewModel() {
     fun onMainCharacterClick() {
         state.update { oldState ->
             val oldData = oldState.gamerData
-            val newData = oldData.copy(
-                coins = oldData.coins + 1
-            )
+
+            // Находим силу клика текущего выбранного персонажа
+            val currentCharacter = GameConfig.allCharacters.find { it.id == oldData.selectedSkinId }
+            val power = currentCharacter?.clickPower ?: 1
+
+            val newData = oldData.copy(coins = oldData.coins + power)
+
             oldState.copy(gamerData = newData)
+        }
+    }
+
+    fun onShopItemClick(character: GameCharacter) {
+        val currentData = state.value.gamerData
+
+        // Сценарий 1: Персонаж уже куплен -> Просто выбираем
+        if (currentData.unlockedCharacterIds.contains(character.id)) {
+            selectCharacter(character.id)
+            return
+        }
+
+        // Сценарий 2: Персонаж не куплен -> Пробуем купить
+        if (currentData.coins >= character.price) {
+            buyAndSelectCharacter(character)
+        } else {
+            // Эффект "Недостаточно денег" (можно добавить вибрацию или тост)
+            println("Not enough money!")
+        }
+    }
+
+    private fun selectCharacter(id: Int) {
+        state.update { oldState ->
+            val newData = oldState.gamerData.copy(selectedSkinId = id)
+            oldState.copy(
+                gamerData = newData,
+                charactersList = mapDataToCharacters(newData)
+            )
+        }
+    }
+
+    private fun buyAndSelectCharacter(character: GameCharacter) {
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+
+            // 1. Списываем деньги
+            // 2. Добавляем ID в список купленных
+            // 3. Ставим ID как выбранный
+            val newData = oldData.copy(
+                coins = oldData.coins - character.price,
+                unlockedCharacterIds = oldData.unlockedCharacterIds + character.id,
+                selectedSkinId = character.id
+            )
+
+            oldState.copy(
+                gamerData = newData,
+                charactersList = mapDataToCharacters(newData)
+            )
+        }
+        // Сразу сохраняем при важной покупке
+        viewModelScope.launch {
+            if (YandexGamesManager.isInitialized) {
+                YandexGamesManager.saveGame(state.value.gamerData)
+            }
+        }
+    }
+
+    // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+
+    private fun updateCharactersList(data: GamerData) {
+        state.update { it.copy(charactersList = mapDataToCharacters(data)) }
+    }
+
+    // Маппер: GameConfig + GamerData -> List<GameCharacter>
+    private fun mapDataToCharacters(data: GamerData): List<GameCharacter> {
+        return GameConfig.allCharacters.map { staticChar ->
+            staticChar.copy(
+                // Персонаж разблокирован, если его ID есть в списке unlockedCharacterIds
+                isUnlocked = data.unlockedCharacterIds.contains(staticChar.id),
+
+                // Персонаж выбран, если его ID совпадает с selectedSkinId
+                isSelected = data.selectedSkinId == staticChar.id
+            )
         }
     }
 

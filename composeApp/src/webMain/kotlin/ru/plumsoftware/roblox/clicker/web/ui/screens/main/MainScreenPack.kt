@@ -1,5 +1,6 @@
 package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 
+import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
 import ru.plumsoftware.roblox.clicker.web.model.GamerData
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
@@ -30,6 +31,7 @@ object MainScreenPack {
 
         val isLoading: Boolean,
         val gamerData: GamerData,
+        val charactersList: List<GameCharacter>
     ) {
         companion object {
             fun default() = MainScreenState(
@@ -38,7 +40,8 @@ object MainScreenPack {
                 shopScreenName = "персонажи",
 
                 isLoading = false,
-                gamerData = GamerData()
+                gamerData = GamerData(),
+                charactersList = emptyList()
             )
         }
     }

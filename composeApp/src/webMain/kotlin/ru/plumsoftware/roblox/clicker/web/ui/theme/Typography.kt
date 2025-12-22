@@ -27,13 +27,15 @@ object AppTypography {
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 45.sp,
-                lineHeight = 52.sp
+                lineHeight = 52.sp,
+                letterSpacing = 7.sp
             ),
             displaySmall = TextStyle(
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 36.sp,
-                lineHeight = 44.sp
+                lineHeight = 44.sp,
+                letterSpacing = 7.sp
             ),
 
             // --- HEADLINE (Заголовки экранов, название магазина) ---
@@ -41,19 +43,22 @@ object AppTypography {
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 32.sp,
-                lineHeight = 40.sp
+                lineHeight = 40.sp,
+                letterSpacing = 5.sp
             ),
             headlineMedium = TextStyle(
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 28.sp,
-                lineHeight = 36.sp
+                lineHeight = 36.sp,
+                letterSpacing = 5.sp
             ),
             headlineSmall = TextStyle(
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 24.sp,
-                lineHeight = 32.sp
+                lineHeight = 32.sp,
+                letterSpacing = 5.sp
             ),
 
             // --- TITLE (Подзаголовки в списках, имена предметов) ---
@@ -61,14 +66,15 @@ object AppTypography {
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
-                lineHeight = 28.sp
+                lineHeight = 28.sp,
+                letterSpacing = 5.sp
             ),
             titleMedium = TextStyle(
                 fontFamily = robloxFontFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
-                letterSpacing = 0.15.sp
+                letterSpacing = 0.5.sp
             ),
             titleSmall = TextStyle(
                 fontFamily = robloxFontFamily,

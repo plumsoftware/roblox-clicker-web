@@ -48,6 +48,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -61,14 +62,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import roblox_clicker_web.composeapp.generated.resources.coin_icon
 import roblox_clicker_web.composeapp.generated.resources.gem_icon
+import roblox_clicker_web.composeapp.generated.resources.homeless
 import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_background
+import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.CharacterItem
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts.getNumericFont
 
 @Composable
 fun MainScreen() {
     val viewModel: MainScreenViewModel = koinViewModel()
-    val state = viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsState()
+
+    // Логика поиска картинки выбранного персонажа
+    val selectedCharacterResource = remember(state.gamerData.selectedSkinId) {
+        state.charactersList.find { it.isSelected }?.resourceName
+            ?: Res.drawable.homeless // Дефолт, если что-то пошло не так
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.effects.collect { effect ->
@@ -129,7 +140,7 @@ fun MainScreen() {
 
 
                             Text(
-                                text = "${state.value.gamerData.coins}",
+                                text = "${state.gamerData.coins}",
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF7D6608),
@@ -160,7 +171,7 @@ fun MainScreen() {
                             Spacer(modifier = Modifier.width(8.dp))
 
                             Text(
-                                text = "${state.value.gamerData.gems}",
+                                text = "${state.gamerData.gems}",
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF0277BD),
@@ -182,7 +193,7 @@ fun MainScreen() {
                 )
 
                 Image(
-                    painter = painterResource(Res.drawable.capitan_roblox_1),
+                    painter = painterResource(selectedCharacterResource),
                     contentDescription = null,
                     modifier = Modifier
                         .weight(1.0f)
@@ -235,7 +246,7 @@ fun MainScreen() {
                             )
 
                             OutlinedText(
-                                text = "${state.value.gamerData.boostId}",
+                                text = "${GameConfig.allCharacters.first { it.id == state.gamerData.selectedSkinId }.clickPower}",
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 fillColor = Color.White,
@@ -277,7 +288,7 @@ fun MainScreen() {
                             )
 
                             OutlinedText(
-                                text = "${state.value.gamerData.boostId}",
+                                text = "${state.gamerData.boostId}",
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 fillColor = Color.White,
@@ -294,7 +305,7 @@ fun MainScreen() {
             // ---------------------------------------------------------
             Column(
                 modifier = Modifier
-                    .width(500.dp)
+                    .width(570.dp)
                     .fillMaxHeight()
                     .background(Color.Black.copy(alpha = 0.4f)),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -339,6 +350,7 @@ fun MainScreen() {
                     }
 
                     // --- КОНТЕНТ ---
+                    // СПИСОК ТОВАРОВ
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -351,42 +363,23 @@ fun MainScreen() {
                             contentPadding = PaddingValues(vertical = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            item {
-                                // Обычный текст можно оставить без жирной обводки для читаемости,
-                                // или сделать тонкую обводку (1f)
-                                Text(
-                                    text = "Здесь будут товары...",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.LightGray
-                                )
+                            if (state.currentScreen is MainScreenScreens.Shop.HeroShop) {
+                                items(state.charactersList) { character ->
+                                    CharacterItem(
+                                        character = character,
+                                        onClick = { viewModel.onShopItemClick(character) }
+                                    )
+                                }
+                            } else {
+                                // Заглушка для других вкладок
+                                item {
+                                    Text("Этот раздел в разработке...", color = Color.Gray)
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
-}
-
-// Обновленный ShopMenuItem с обводкой
-@Composable
-private fun ShopMenuItem(
-    text: String,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        OutlinedText(
-            text = text,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            fillColor = Color.White,
-            outlineColor = Color.Black,
-            strokeWidth = 4f
-        )
     }
 }
