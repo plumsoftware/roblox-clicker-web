@@ -46,14 +46,23 @@ import ru.plumsoftware.roblox.clicker.web.ui.theme.AppTheme
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import roblox_clicker_web.composeapp.generated.resources.coin_icon
+import roblox_clicker_web.composeapp.generated.resources.gem_icon
 import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_background
+import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
+import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts.getNumericFont
 
 @Composable
 fun MainScreen() {
@@ -90,18 +99,81 @@ fun MainScreen() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Персонаж для клика
-                // 1. Создаем источник взаимодействия (ты его уже создал, используем тот же)
-                val characterInteractionSource = remember { MutableInteractionSource() }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, start = 20.dp, end = 20.dp)
+                ) {
+                    // --- КАРТОЧКА МОНЕТ ---
+                    Card(
+                        modifier = Modifier.align(Alignment.Center),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFF9E79F)
+                        ),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                modifier = Modifier.size(48.dp),
+                                painter = painterResource(Res.drawable.coin_icon),
+                                contentDescription = null,
+                                contentScale = ContentScale.Fit
+                            )
 
-                // 2. Отслеживаем состояние "Нажато" (true/false)
+                            Spacer(modifier = Modifier.width(8.dp))
+
+
+                            Text(
+                                text = "${state.value.gamerData.coins}",
+                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF7D6608),
+                            )
+                        }
+                    }
+
+                    // --- КАРТОЧКА ГЕМОВ ---
+                    Card(
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFB3E5FC)
+                        ),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                modifier = Modifier.size(48.dp),
+                                painter = painterResource(Res.drawable.gem_icon),
+                                contentDescription = null,
+                                contentScale = ContentScale.Fit
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = "${state.value.gamerData.gems}",
+                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0277BD),
+                            )
+                        }
+                    }
+                }
+
+                // Персонаж
+                val characterInteractionSource = remember { MutableInteractionSource() }
                 val isPressed by characterInteractionSource.collectIsPressedAsState()
 
-                // 3. Анимируем значение масштаба
-                // Если нажато -> 0.9f (уменьшился), если нет -> 1.0f (нормальный)
                 val scale by animateFloatAsState(
                     targetValue = if (isPressed) 0.9f else 1.0f,
-                    // Настройка пружины для приятного "отскока"
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioMediumBouncy,
                         stiffness = Spring.StiffnessMedium
@@ -112,20 +184,20 @@ fun MainScreen() {
                     painter = painterResource(Res.drawable.capitan_roblox_1),
                     contentDescription = null,
                     modifier = Modifier
-                        // 4. Применяем масштаб ПЕРЕД clickable
+                        .weight(1.0f)
                         .scale(scale)
                         .clickable(
                             interactionSource = characterInteractionSource,
-                            indication = null, // Отключаем серую волну (ripple)
+                            indication = null,
                             onClick = {
-
+                                viewModel.onMainCharacterClick()
                             }
                         )
                 )
             }
 
             // ---------------------------------------------------------
-            // 2. ПРАВАЯ ЧАСТЬ (МАГАЗИН - 500dp)
+            // 2. ПРАВАЯ ЧАСТЬ (МАГАЗИН)
             // ---------------------------------------------------------
             Column(
                 modifier = Modifier
@@ -135,20 +207,21 @@ fun MainScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Заголовок магазина
-                Text(
+                OutlinedText(
                     modifier = Modifier.padding(vertical = 24.dp),
                     text = "магазин",
                     style = MaterialTheme.typography.displayMedium,
-                    color = Color.White
+                    fontWeight = FontWeight.Black,
+                    fillColor = Color.White,
+                    outlineColor = Color.Black,
+                    strokeWidth = 6f // Заголовок жирнее
                 )
 
-                // Разделяем область магазина на Меню (слева) и Список товаров (справа)
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.Start
                 ) {
-
-                    // --- КОЛОНКА НАВИГАЦИИ (МЕНЮ) ---
+                    // --- МЕНЮ ---
                     Column(
                         modifier = Modifier
                             .width(200.dp)
@@ -158,25 +231,21 @@ fun MainScreen() {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        // Пункты меню
                         ShopMenuItem(text = "герои") {
                             viewModel.onEvent(MainScreenPack.Event.onHeroClick())
                         }
-
                         ShopMenuItem(text = "бусты") {
                             viewModel.onEvent(MainScreenPack.Event.onBoostClick())
                         }
-
                         ShopMenuItem(text = "звуки") {
                             viewModel.onEvent(MainScreenPack.Event.onSoundsClick())
                         }
-
                         ShopMenuItem(text = "фоны") {
                             viewModel.onEvent(MainScreenPack.Event.onBackClick())
                         }
                     }
 
-                    // --- КОЛОНКА КОНТЕНТА (СПИСОК ТОВАРОВ) ---
+                    // --- КОНТЕНТ ---
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -190,6 +259,8 @@ fun MainScreen() {
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             item {
+                                // Обычный текст можно оставить без жирной обводки для читаемости,
+                                // или сделать тонкую обводку (1f)
                                 Text(
                                     text = "Здесь будут товары...",
                                     style = MaterialTheme.typography.bodyLarge,
@@ -201,5 +272,28 @@ fun MainScreen() {
                 }
             }
         }
+    }
+}
+
+// Обновленный ShopMenuItem с обводкой
+@Composable
+private fun ShopMenuItem(
+    text: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        OutlinedText(
+            text = text,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            fillColor = Color.White,
+            outlineColor = Color.Black,
+            strokeWidth = 4f
+        )
     }
 }
