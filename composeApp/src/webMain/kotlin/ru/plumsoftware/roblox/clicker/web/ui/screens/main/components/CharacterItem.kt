@@ -31,6 +31,7 @@ import roblox_clicker_web.composeapp.generated.resources.Res
 import roblox_clicker_web.composeapp.generated.resources.coin_icon
 import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
 import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts
+import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
 
 @Composable
 fun CharacterItem(
@@ -89,7 +90,7 @@ fun CharacterItem(
             Spacer(modifier = Modifier.width(20.dp))
 
             Text(
-                text = "+${character.clickPower} клик",
+                text = "+${formatCompactNumber(character.clickPower)} клик",
                 style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
                 color = Color.Green,
                 fontWeight = FontWeight.Medium,
@@ -106,7 +107,7 @@ fun CharacterItem(
                 // Цена
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "${character.price}",
+                        text = formatCompactNumber(character.price),
                         style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
                         color = Color(0xFFFFD600), // Золотой
                         fontWeight = FontWeight.Medium,

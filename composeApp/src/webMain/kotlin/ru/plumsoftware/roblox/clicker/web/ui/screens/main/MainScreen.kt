@@ -69,6 +69,7 @@ import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.CharacterItem
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts.getNumericFont
+import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
 
 @Composable
 fun MainScreen() {
@@ -140,7 +141,7 @@ fun MainScreen() {
 
 
                             Text(
-                                text = "${state.gamerData.coins}",
+                                text = formatCompactNumber(state.gamerData.coins),
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF7D6608),
@@ -171,7 +172,7 @@ fun MainScreen() {
                             Spacer(modifier = Modifier.width(8.dp))
 
                             Text(
-                                text = "${state.gamerData.gems}",
+                                text = formatCompactNumber(state.gamerData.gems),
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF0277BD),
@@ -246,7 +247,7 @@ fun MainScreen() {
                             )
 
                             OutlinedText(
-                                text = "${GameConfig.allCharacters.first { it.id == state.gamerData.selectedSkinId }.clickPower}",
+                                text = formatCompactNumber(GameConfig.allCharacters.first { it.id == state.gamerData.selectedSkinId }.clickPower),
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 fillColor = Color.White,
@@ -288,7 +289,7 @@ fun MainScreen() {
                             )
 
                             OutlinedText(
-                                text = "${state.gamerData.boostId}",
+                                text = formatCompactNumber(state.gamerData.boostId),
                                 style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                 fontWeight = FontWeight.Bold,
                                 fillColor = Color.White,
