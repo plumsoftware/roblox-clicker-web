@@ -48,6 +48,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -194,6 +195,98 @@ fun MainScreen() {
                             }
                         )
                 )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp, end = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Card(
+                        modifier = Modifier,
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Black.copy(alpha = 0.3f)
+                        ),
+                        shape = MaterialTheme.shapes.large.copy(
+                            topStart = CornerSize(0.dp), bottomStart = CornerSize(0.dp)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(
+                                start = 40.dp,
+                                end = 20.dp,
+                                top = 10.dp,
+                                bottom = 10.dp
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(
+                                space = 20.dp,
+                                alignment = Alignment.CenterHorizontally
+                            )
+                        ) {
+                            OutlinedText(
+                                text = "клик",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                fillColor = Color.White,
+                                outlineColor = Color.Black,
+                                strokeWidth = 4f
+                            )
+
+                            OutlinedText(
+                                text = "${state.value.gamerData.boostId}",
+                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                fontWeight = FontWeight.Bold,
+                                fillColor = Color.White,
+                                outlineColor = Color.Black,
+                                strokeWidth = 4f
+                            )
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier,
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Black.copy(alpha = 0.3f)
+                        ),
+                        shape = MaterialTheme.shapes.large.copy(
+                            topEnd = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(
+                                start = 20.dp,
+                                end = 40.dp,
+                                top = 10.dp,
+                                bottom = 10.dp
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(
+                                space = 20.dp,
+                                alignment = Alignment.CenterHorizontally
+                            )
+                        ) {
+                            OutlinedText(
+                                text = "автоклик",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                fillColor = Color.White,
+                                outlineColor = Color.Black,
+                                strokeWidth = 4f
+                            )
+
+                            OutlinedText(
+                                text = "${state.value.gamerData.boostId}",
+                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                fontWeight = FontWeight.Bold,
+                                fillColor = Color.White,
+                                outlineColor = Color.Black,
+                                strokeWidth = 4f
+                            )
+                        }
+                    }
+                }
             }
 
             // ---------------------------------------------------------

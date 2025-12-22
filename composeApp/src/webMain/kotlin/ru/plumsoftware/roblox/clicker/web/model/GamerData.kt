@@ -11,6 +11,7 @@ data class GamerData(
     val selectedSkinId: Int = 0,
     val selectedMusicId: Int = 0,
     val selectedBackgroundId: Int = 0,
+    val boostId: Int = 0
 
     // Можно добавить список купленных товаров
     // val inventory: List<Int> = emptyList()
