@@ -10,4 +10,7 @@ expect object AudioManager {
     fun playSound(fileName: String, volume: Double = 0.5)
     fun playMusic(fileName: String, volume: Double = 0.3)
     fun stopMusic()
+
+    fun pauseMusic()  // Поставить на паузу (сохранив место)
+    fun resumeMusic() // Продолжить воспроизведение
 }

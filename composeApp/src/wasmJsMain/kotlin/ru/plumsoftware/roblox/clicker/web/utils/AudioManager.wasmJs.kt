@@ -17,4 +17,7 @@ actual object AudioManager {
 
     actual fun stopMusic() {
     }
+
+    actual fun pauseMusic() {}
+    actual fun resumeMusic() {}
 }

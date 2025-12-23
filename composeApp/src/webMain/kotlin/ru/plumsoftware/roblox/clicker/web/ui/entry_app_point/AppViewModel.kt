@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import ru.plumsoftware.roblox.clicker.web.utils.AudioManager
+import ru.plumsoftware.roblox.clicker.web.utils.GameLifecycle
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
 
 class AppViewModel : ViewModel() {
@@ -17,6 +19,22 @@ class AppViewModel : ViewModel() {
 
     init {
         initializeApp()
+//        observeLifecycle()
+    }
+
+    private fun observeLifecycle() {
+        viewModelScope.launch {
+            // Подписываемся на изменения состояния вкладки (свернута/развернута)
+            GameLifecycle.isGameActive.collect { isActive ->
+                if (isActive) {
+                    // Вкладка открылась -> Возобновляем музыку
+                    AudioManager.resumeMusic()
+                } else {
+                    // Вкладка свернулась -> Пауза
+                    AudioManager.pauseMusic()
+                }
+            }
+        }
     }
 
     private fun initializeApp() {

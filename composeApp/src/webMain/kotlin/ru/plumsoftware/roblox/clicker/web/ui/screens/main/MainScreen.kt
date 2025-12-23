@@ -137,29 +137,39 @@ fun MainScreen() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box (
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
-                        // --- ЗВУК ---
-//                        Card(
-//                            modifier = Modifier,
-//                            colors = CardDefaults.cardColors(
-//                                containerColor = Color.Black.copy(alpha = 0.3f)
-//                            ),
-//                            shape = MaterialTheme.shapes.medium,
-//                            onClick = {
-//                                viewModel.changeIsSoundOn()
-//                            }
-//                        ) {
-//                            OutlinedText(
-//                                text = if (state.isSoundOn) "звук: вкл" else "зыук: выкл",
-//                                style = MaterialTheme.typography.displaySmall,
-//                                fontWeight = FontWeight.Bold,
-//                                fillColor = Color.White
-//                            )
-//                        }
+                        // --- ЗВУК --- -
+                        Card(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            onClick = { viewModel.onToggleMusic() },
+                            colors = CardDefaults.cardColors(
+                                // Полупрозрачный черный фон
+                                containerColor = Color.Black.copy(alpha = 0.4f)
+                            ),
+                            shape = MaterialTheme.shapes.medium,
+                            border = BorderStroke(
+                                2.dp,
+                                Color.White.copy(alpha = 0.5f)
+                            ) // Белая обводка для стиля
+                        ) {
+                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                                OutlinedText(
+                                    // Меняем текст в зависимости от стейта
+                                    text = if (state.gamerData.isMusicOn) "музыка: вкл" else "музыка: выкл",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
+                                        0xFFFF1744
+                                    ), // Зеленый или Красный
+                                    outlineColor = Color.Black,
+                                    strokeWidth = 3f
+                                )
+                            }
+                        }
 
                         // --- КАРТОЧКА МОНЕТ ---
                         Card(
@@ -404,7 +414,9 @@ fun MainScreen() {
                                 if (unclaimedCount > 0) {
                                     Text(
                                         text = "+$unclaimedCount",
-                                        style = MaterialTheme.typography.displaySmall.copy(fontFamily = getNumericFont()),
+                                        style = MaterialTheme.typography.displaySmall.copy(
+                                            fontFamily = getNumericFont()
+                                        ),
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF0277BD)
                                     )
@@ -501,18 +513,18 @@ fun MainScreen() {
                                             onClick = { viewModel.onBackgroundItemClick(background) }
                                         )
                                     }
-                                }
-                                else if (state.currentScreen is MainScreenScreens.Shop.BoostShop) {
+                                } else if (state.currentScreen is MainScreenScreens.Shop.BoostShop) {
                                     items(GameConfig.allBoosts) { boost ->
                                         BoostCard(
                                             boost = boost,
                                             // Проверяем, куплен ли
-                                            isUnlocked = state.gamerData.unlockedBoostIds.contains(boost.id),
+                                            isUnlocked = state.gamerData.unlockedBoostIds.contains(
+                                                boost.id
+                                            ),
                                             onClick = { viewModel.onBoostItemClick(boost) }
                                         )
                                     }
-                                }
-                                else {
+                                } else {
                                     // Заглушка для других вкладок
                                     item {
                                         Text("Этот раздел в разработке...", color = Color.Gray)
@@ -526,7 +538,8 @@ fun MainScreen() {
 
             // --- ДИАЛОГОВОЕ ОКНО (ПОВЕРХ ВСЕГО) ---
             if (state.currentMainScreenDialog is MainScreenDialog.MainDialog.ClaimGemsDialog) {
-                val gemsAmount = (state.currentMainScreenDialog as MainScreenDialog.MainDialog.ClaimGemsDialog).amount
+                val gemsAmount =
+                    (state.currentMainScreenDialog as MainScreenDialog.MainDialog.ClaimGemsDialog).amount
 
                 // Затемнение фона
                 Box(
@@ -571,7 +584,11 @@ fun MainScreen() {
 
                             Button(
                                 onClick = { viewModel.onEvent(MainScreenPack.Event.onCloseDialog) },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF00E676
+                                    )
+                                ),
                                 border = BorderStroke(0.dp, Color.Black),
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier.fillMaxWidth()

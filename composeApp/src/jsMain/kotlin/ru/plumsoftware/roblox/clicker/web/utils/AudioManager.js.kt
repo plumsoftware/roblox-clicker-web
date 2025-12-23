@@ -4,107 +4,124 @@ package ru.plumsoftware.roblox.clicker.web.utils
 
 import kotlinx.browser.document
 import org.w3c.dom.Audio
-import org.w3c.dom.events.Event
 
 actual object AudioManager {
 
     private var backgroundMusic: Audio? = null
 
-    // Флаг: играла ли музыка в момент сворачивания?
-    // Нужно, чтобы не включать музыку, если пользователь сам нажал "Выкл звук"
+    // Флаг: играла ли музыка до сворачивания вкладки
     private var wasPlayingBeforeHide: Boolean = false
 
+    // По умолчанию true, но ViewModel должна обновить это при загрузке профиля
     actual var isSoundEnabled: Boolean = true
     actual var isMusicEnabled: Boolean = true
 
     init {
-        // Подписываемся на событие браузера при первой инициализации объекта
+        // Подписываемся на сворачивание вкладки
         document.addEventListener("visibilitychange", {
             handleVisibilityChange()
         })
-        console.log("[AudioManager] Visibility listener registered")
+        console.log("[Audio] Manager initialized")
     }
 
     private fun handleVisibilityChange() {
-        // Получаем состояние видимости (через dynamic, так надежнее в JS)
         val isHidden = document.asDynamic().hidden.unsafeCast<Boolean>()
 
         if (isHidden) {
-            // --- ВКЛАДКА СВЕРНУТА ---
-            console.log("[AudioManager] Tab hidden. Checking music...")
-
-            // Если музыка есть и она НЕ на паузе
+            // Вкладку свернули -> Пауза
             if (backgroundMusic != null && backgroundMusic?.paused == false) {
                 backgroundMusic?.pause()
                 wasPlayingBeforeHide = true
-                console.log("[AudioManager] Music paused (Auto)")
+                console.log("[Audio] Auto-paused (Tab hidden)")
             } else {
                 wasPlayingBeforeHide = false
             }
         } else {
-            // --- ВКЛАДКА РАЗВЕРНУТА ---
-            console.log("[AudioManager] Tab visible.")
-
-            // Возобновляем, только если она играла до этого И настройки разрешают
+            // Вкладку открыли -> Возобновляем
             if (wasPlayingBeforeHide && isMusicEnabled && backgroundMusic != null) {
-                backgroundMusic?.play()
+                val promise = backgroundMusic?.play()
+                promise?.catch { e -> console.warn("[Audio] Resume blocked:", e) }
                 wasPlayingBeforeHide = false
-                console.log("[AudioManager] Music resumed (Auto)")
+                console.log("[Audio] Auto-resumed (Tab visible)")
             }
         }
     }
 
     actual fun playSound(fileName: String, volume: Double) {
-        if (!isSoundEnabled) return
-
-        // Не играем звуки, если вкладка свернута (экономим ресурсы)
-        val isHidden = document.asDynamic().hidden.unsafeCast<Boolean>()
-        if (isHidden) return
+        if (!isSoundEnabled) {
+            // console.log("[Audio] Skip sound (Disabled setting)")
+            return
+        }
 
         try {
+            // Создаем новый объект на каждый клик для наложения звуков
             val audio = Audio("sounds/$fileName")
             audio.volume = volume
-            audio.play()
+            val promise = audio.play()
+            promise.catch { e ->
+                // Ошибки клика можно не логировать громко, чтобы не спамить
+            }
         } catch (e: dynamic) {
-            console.error("Audio error:", e)
+            console.error("[Audio] SFX Error:", e)
         }
     }
 
     actual fun playMusic(fileName: String, volume: Double) {
-        if (!isMusicEnabled) return
+        // Даже если isMusicEnabled == false, мы сохраняем объект, но не играем,
+        // или просто выходим. Лучше выходить.
+        if (!isMusicEnabled) {
+            console.log("[Audio] PlayMusic skipped (Music Disabled)")
+            return
+        }
 
         try {
-            // Если уже играет этот же трек - выходим (чтобы не сбрасывать на начало)
-            // Но проверяем, не на паузе ли он
+            // Если уже играет ЭТОТ ЖЕ трек
             if (backgroundMusic?.src?.contains(fileName) == true) {
                 if (backgroundMusic?.paused == true) {
+                    console.log("[Audio] Resuming existing track")
                     backgroundMusic?.play()
                 }
                 return
             }
 
-            stopMusic()
+            stopMusic() // Останавливаем старый
 
+            console.log("[Audio] Starting new track: $fileName")
             val audio = Audio("sounds/$fileName")
             audio.volume = volume
             audio.loop = true
 
-            // Сохраняем ссылку перед запуском
             backgroundMusic = audio
 
-            // Запуск
-            audio.play().catch { e ->
-                console.warn("Autoplay blocked or error:", e)
+            val promise = audio.play()
+            promise.then {
+                console.log("[Audio] Music started successfully")
+            }.catch { e ->
+                console.warn("[Audio] Autoplay blocked or file not found:", e)
             }
 
         } catch (e: dynamic) {
-            console.error("Music error:", e)
+            console.error("[Audio] Music Error:", e)
         }
     }
 
     actual fun stopMusic() {
-        backgroundMusic?.pause()
-        backgroundMusic = null
+        if (backgroundMusic != null) {
+            console.log("[Audio] Stopping music")
+            backgroundMusic?.pause()
+            backgroundMusic = null
+        }
         wasPlayingBeforeHide = false
+    }
+
+    // Методы ручного управления (если понадобятся)
+    actual fun pauseMusic() {
+        backgroundMusic?.pause()
+    }
+
+    actual fun resumeMusic() {
+        if (isMusicEnabled && backgroundMusic != null) {
+            backgroundMusic?.play()
+        }
     }
 }

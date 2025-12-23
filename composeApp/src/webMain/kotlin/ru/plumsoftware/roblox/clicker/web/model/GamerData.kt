@@ -26,5 +26,7 @@ data class GamerData(
     val unlockedBackgroundIds: List<Int> = listOf(1), // ID 1 куплен сразу
 
     // Список купленных бустов
-    val unlockedBoostIds: List<Int> = emptyList()
+    val unlockedBoostIds: List<Int> = emptyList(),
+
+    val isMusicOn: Boolean = true
 )

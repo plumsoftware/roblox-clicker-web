@@ -30,6 +30,8 @@ class MainScreenViewModel : ViewModel() {
     // State
     val state = MutableStateFlow(MainScreenPack.MainScreenState.default())
 
+    private var isBgMusicInitialized = false
+
     init {
         loadProgress()
         startAutoSave()
@@ -149,6 +151,9 @@ class MainScreenViewModel : ViewModel() {
                 }
             }
 
+            AudioManager.isMusicEnabled = loadedData.isMusicOn
+            AudioManager.isSoundEnabled = true // Или тоже добавь isSoundOn в GamerData
+
             // Обновляем состояние
             state.update {
                 it.copy(
@@ -261,13 +266,16 @@ class MainScreenViewModel : ViewModel() {
 
     fun onMainCharacterClick() {
 
-//        if (!state.value.isStartedBgMusic) {
-//            AudioManager.playSound(
-//                fileName = "Sakura-Girl-Cat-Walk-chosic.com_.mp3",
-//                volume = 0.05
-//            )
-//            state.update { it.copy(isStartedBgMusic = true) }
-//        }
+        if (!isBgMusicInitialized) {
+            isBgMusicInitialized = true
+
+            // Если музыка включена в настройках - запускаем
+            if (state.value.gamerData.isMusicOn) {
+                // ИСПОЛЬЗУЕМ playMusic, А НЕ playSound!
+                // Убедись, что файл Sakura-Girl-Cat-Walk-chosic.com_.mp3 лежит в src/jsMain/resources/sounds/
+                AudioManager.playMusic("Sakura-Girl-Cat-Walk-chosic.com_.mp3", volume = 0.3)
+            }
+        }
 
         state.update { oldState ->
             val oldData = oldState.gamerData
@@ -534,6 +542,32 @@ class MainScreenViewModel : ViewModel() {
             }
             effects.emit(effect)
         }
+    }
+
+    // --- ПЕРЕКЛЮЧЕНИЕ МУЗЫКИ ---
+    fun onToggleMusic() {
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+            val newState = !oldData.isMusicOn // Инвертируем
+
+            if (newState) {
+                // ВКЛЮЧАЕМ
+                AudioManager.isMusicEnabled = true
+                // Сразу запускаем, так как пользователь уже кликнул по кнопке (интеракция есть)
+                AudioManager.playMusic("Sakura-Girl-Cat-Walk-chosic.com_.mp3", volume = 0.3)
+                // Помечаем, что музыка уже инициализирована
+                isBgMusicInitialized = true
+            } else {
+                // ВЫКЛЮЧАЕМ
+                AudioManager.isMusicEnabled = false
+                AudioManager.stopMusic()
+            }
+
+            val newData = oldData.copy(isMusicOn = newState)
+            // Обновляем и GamerData, и флаг UI isSoundOn
+            oldState.copy(gamerData = newData, isSoundOn = newState)
+        }
+        saveGameImmediately()
     }
 
     private fun getShopName(currentScreen: MainScreenScreens): String {
