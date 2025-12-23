@@ -2,11 +2,14 @@ package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
@@ -14,6 +17,7 @@ import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.model.GamerData
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
+import ru.plumsoftware.roblox.clicker.web.utils.AudioManager
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
 
 class MainScreenViewModel : ViewModel() {
@@ -84,7 +88,30 @@ class MainScreenViewModel : ViewModel() {
         }
     }
 
+    fun changeIsSoundOn() {
+        state.update {
+            it.copy(isSoundOn = !state.value.isSoundOn)
+        }
+        if (state.value.isSoundOn) {
+            AudioManager.playSound(
+                fileName = "Sakura-Girl-Cat-Walk-chosic.com_.mp3",
+                volume = 0.05
+            )
+        } else {
+            AudioManager.stopMusic()
+        }
+    }
+
     fun onMainCharacterClick() {
+
+//        if (!state.value.isStartedBgMusic) {
+//            AudioManager.playSound(
+//                fileName = "Sakura-Girl-Cat-Walk-chosic.com_.mp3",
+//                volume = 0.05
+//            )
+//            state.update { it.copy(isStartedBgMusic = true) }
+//        }
+
         state.update { oldState ->
             val oldData = oldState.gamerData
             val currentCharacter = GameConfig.allCharacters.find { it.id == oldData.selectedSkinId }
@@ -96,7 +123,8 @@ class MainScreenViewModel : ViewModel() {
             var newProgress = oldData.clickProgressForGems + power
             var newUnclaimedGems = oldData.unclaimedGems // Работаем с unclaimed
 
-            val target = if (oldState.maxClickProgressForGems > 0) oldState.maxClickProgressForGems else 100.0
+            val target =
+                if (oldState.maxClickProgressForGems > 0) oldState.maxClickProgressForGems else 100.0
 
             if (newProgress >= target) {
                 // УРА! Гем падает в "копилку" (unclaimed), а не сразу в баланс
@@ -124,6 +152,9 @@ class MainScreenViewModel : ViewModel() {
                 maxClickProgressForGems = newMaxProgress
             )
         }
+        if (state.value.isSoundOn) {
+            AudioManager.playSound("minecraft-click.mp3")
+        }
     }
 
     // --- ЛОГИКА СБОРА ГЕМОВ ---
@@ -143,7 +174,9 @@ class MainScreenViewModel : ViewModel() {
             // 2. Показываем диалог
             oldState.copy(
                 gamerData = newData,
-                currentMainScreenDialog = MainScreenDialog.MainDialog.ClaimGemsDialog(currentUnclaimed)
+                currentMainScreenDialog = MainScreenDialog.MainDialog.ClaimGemsDialog(
+                    currentUnclaimed
+                )
             )
         }
         // Сохраняем сразу, так как изменилась важная валюта
@@ -196,12 +229,14 @@ class MainScreenViewModel : ViewModel() {
                 YandexGamesManager.saveGame(state.value.gamerData)
             }
         }
+        AudioManager.playSound("buy-1.mp3")
     }
 
     private fun setupClickPowerForGems() {
-        val currentCLickPower = GameConfig.allCharacters.first { it.id == state.value.gamerData.selectedSkinId }.clickPower
+        val currentCLickPower =
+            GameConfig.allCharacters.first { it.id == state.value.gamerData.selectedSkinId }.clickPower
         val gemMultiplier = if (state.value.gamerData.gems == 0L) 1 else state.value.gamerData.gems
-        val clickPowerForGems = currentCLickPower/(10.0 * gemMultiplier.toDouble())
+        val clickPowerForGems = currentCLickPower / (10.0 * gemMultiplier.toDouble())
 
         state.update {
             it.copy(
@@ -344,7 +379,7 @@ class MainScreenViewModel : ViewModel() {
         }
     }
 
-    private fun getShopName(currentScreen: MainScreenScreens) : String {
+    private fun getShopName(currentScreen: MainScreenScreens): String {
         return when (currentScreen) {
             is MainScreenScreens.Shop.BackShop -> "задний фон"
             is MainScreenScreens.Shop.BoostShop -> "бусты и улучшения"

@@ -37,7 +37,10 @@ object MainScreenPack {
         val charactersList: List<GameCharacter>,
 
         val clickPowerForGems: Double,
-        val maxClickProgressForGems: Double
+        val maxClickProgressForGems: Double,
+
+        val isStartedBgMusic: Boolean,
+        val isSoundOn: Boolean
     ) {
         companion object {
             fun default() = MainScreenState(
@@ -50,7 +53,10 @@ object MainScreenPack {
                 charactersList = emptyList(),
 
                 clickPowerForGems = 0.0,
-                maxClickProgressForGems = 0.0
+                maxClickProgressForGems = 0.0,
+
+                isStartedBgMusic = false,
+                isSoundOn = true
             )
         }
     }

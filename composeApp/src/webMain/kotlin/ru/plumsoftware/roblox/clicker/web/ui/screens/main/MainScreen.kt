@@ -124,11 +124,30 @@ fun MainScreen() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
+                    Box (
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
+                        // --- ЗВУК ---
+//                        Card(
+//                            modifier = Modifier,
+//                            colors = CardDefaults.cardColors(
+//                                containerColor = Color.Black.copy(alpha = 0.3f)
+//                            ),
+//                            shape = MaterialTheme.shapes.medium,
+//                            onClick = {
+//                                viewModel.changeIsSoundOn()
+//                            }
+//                        ) {
+//                            OutlinedText(
+//                                text = if (state.isSoundOn) "звук: вкл" else "зыук: выкл",
+//                                style = MaterialTheme.typography.displaySmall,
+//                                fontWeight = FontWeight.Bold,
+//                                fillColor = Color.White
+//                            )
+//                        }
+
                         // --- КАРТОЧКА МОНЕТ ---
                         Card(
                             modifier = Modifier.align(Alignment.Center),
