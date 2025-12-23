@@ -27,6 +27,8 @@ class MainScreenViewModel : ViewModel() {
         loadProgress()
         startAutoSave()
 
+        // При старте считаем, какая должна быть цель
+        recalculateGemTarget(state.value.gamerData)
         updateCharactersList(state.value.gamerData)
     }
 
@@ -65,6 +67,8 @@ class MainScreenViewModel : ViewModel() {
                 )
             }
             println("MainVM: Data loaded! Coins: ${loadedData.coins}")
+        }.invokeOnCompletion {
+            setupClickPowerForGems()
         }
     }
 
@@ -83,15 +87,71 @@ class MainScreenViewModel : ViewModel() {
     fun onMainCharacterClick() {
         state.update { oldState ->
             val oldData = oldState.gamerData
-
-            // Находим силу клика текущего выбранного персонажа
             val currentCharacter = GameConfig.allCharacters.find { it.id == oldData.selectedSkinId }
             val power = currentCharacter?.clickPower ?: 1
 
-            val newData = oldData.copy(coins = oldData.coins + power)
+            val newCoins = oldData.coins + power
 
-            oldState.copy(gamerData = newData)
+            // Логика Гемификации
+            var newProgress = oldData.clickProgressForGems + power
+            var newUnclaimedGems = oldData.unclaimedGems // Работаем с unclaimed
+
+            val target = if (oldState.maxClickProgressForGems > 0) oldState.maxClickProgressForGems else 100.0
+
+            if (newProgress >= target) {
+                // УРА! Гем падает в "копилку" (unclaimed), а не сразу в баланс
+                newUnclaimedGems++
+                newProgress = 0.0 // Сброс
+            }
+
+            val newData = oldData.copy(
+                coins = newCoins,
+                unclaimedGems = newUnclaimedGems, // Обновляем копилку
+                clickProgressForGems = newProgress
+            )
+
+            // Сложность пересчитываем от СУММЫ (имеющиеся + в копилке), чтобы не абузили
+            val totalGems = oldData.gems + newUnclaimedGems
+
+            val newMaxProgress = if (newUnclaimedGems > oldData.unclaimedGems) {
+                calculateTarget(power, totalGems)
+            } else {
+                oldState.maxClickProgressForGems
+            }
+
+            oldState.copy(
+                gamerData = newData,
+                maxClickProgressForGems = newMaxProgress
+            )
         }
+    }
+
+    // --- ЛОГИКА СБОРА ГЕМОВ ---
+    private fun claimGems() {
+        val currentUnclaimed = state.value.gamerData.unclaimedGems
+        if (currentUnclaimed <= 0) return
+
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+
+            // 1. Переносим из копилки в основной баланс
+            val newData = oldData.copy(
+                gems = oldData.gems + currentUnclaimed,
+                unclaimedGems = 0
+            )
+
+            // 2. Показываем диалог
+            oldState.copy(
+                gamerData = newData,
+                currentMainScreenDialog = MainScreenDialog.MainDialog.ClaimGemsDialog(currentUnclaimed)
+            )
+        }
+        // Сохраняем сразу, так как изменилась важная валюта
+        saveGameImmediately()
+    }
+
+    private fun closeDialog() {
+        state.update { it.copy(currentMainScreenDialog = MainScreenDialog.Empty) }
     }
 
     fun onShopItemClick(character: GameCharacter) {
@@ -109,16 +169,6 @@ class MainScreenViewModel : ViewModel() {
         } else {
             // Эффект "Недостаточно денег" (можно добавить вибрацию или тост)
             println("Not enough money!")
-        }
-    }
-
-    private fun selectCharacter(id: Int) {
-        state.update { oldState ->
-            val newData = oldState.gamerData.copy(selectedSkinId = id)
-            oldState.copy(
-                gamerData = newData,
-                charactersList = mapDataToCharacters(newData)
-            )
         }
     }
 
@@ -148,8 +198,59 @@ class MainScreenViewModel : ViewModel() {
         }
     }
 
-    // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+    private fun setupClickPowerForGems() {
+        val currentCLickPower = GameConfig.allCharacters.first { it.id == state.value.gamerData.selectedSkinId }.clickPower
+        val gemMultiplier = if (state.value.gamerData.gems == 0L) 1 else state.value.gamerData.gems
+        val clickPowerForGems = currentCLickPower/(10.0 * gemMultiplier.toDouble())
 
+        state.update {
+            it.copy(
+                clickPowerForGems = clickPowerForGems,
+                maxClickProgressForGems = currentCLickPower.toDouble()
+            )
+        }
+
+        recalculateGemTarget(state.value.gamerData)
+    }
+
+    // --- ЛОГИКА ПЕРЕСЧЕТА ЦЕЛИ ---
+
+    // Вызывай это при смене персонажа и при загрузке
+    private fun recalculateGemTarget(data: GamerData) {
+        val currentCharacter = GameConfig.allCharacters.find { it.id == data.selectedSkinId }
+        val power = currentCharacter?.clickPower ?: 1
+        val totalGems = data.gems + data.unclaimedGems
+        val newTarget = calculateTarget(power, totalGems)
+        state.update { it.copy(maxClickProgressForGems = newTarget) }
+    }
+
+    // Формула сложности
+    private fun calculateTarget(heroPower: Long, currentGems: Long): Double {
+        // База: нужно сделать 100 кликов текущим героем, чтобы получить гем.
+        // Усложнение: Каждый гем увеличивает требование на 5% (коэффициент 0.05)
+        // Пример: 0 гемов -> 100 кликов. 10 гемов -> 150 кликов.
+        val baseClicksNeeded = 50 // Сколько кликов нужно для 1-го гема
+        val difficultyMultiplier = 1.0 + (currentGems * 0.05)
+
+        return (heroPower * baseClicksNeeded * difficultyMultiplier)
+    }
+
+    // --- ОБНОВЛЕНИЕ ПРИ СМЕНЕ ГЕРОЯ ---
+
+    private fun selectCharacter(id: Int) {
+        state.update { oldState ->
+            val newData = oldState.gamerData.copy(selectedSkinId = id)
+            oldState.copy(
+                gamerData = newData,
+                charactersList = mapDataToCharacters(newData)
+            )
+        }
+        // ВАЖНО: При смене героя пересчитываем цель,
+        // иначе сильным героем набьешь гемы за секунду по старой цели
+        recalculateGemTarget(state.value.gamerData)
+    }
+
+    // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
     private fun updateCharactersList(data: GamerData) {
         state.update { it.copy(charactersList = mapDataToCharacters(data)) }
     }
@@ -168,7 +269,6 @@ class MainScreenViewModel : ViewModel() {
     }
 
     // --- ЛОГИКА UI (НАВИГАЦИЯ) ---
-
     fun onEvent(event: MainScreenPack.Event) {
         when (event) {
             is MainScreenPack.Event.onSettingsClick -> {
@@ -205,6 +305,19 @@ class MainScreenViewModel : ViewModel() {
                     effect = MainScreenPack.Effect.onSoundsClicked
                 )
             }
+
+            is MainScreenPack.Event.onClaimGemsClick -> claimGems() // Нажали на карточку
+
+            is MainScreenPack.Event.onCloseDialog -> closeDialog()  // Нажали "Забрать" в диалоге
+        }
+    }
+
+    // Вспомогательная для сохранения
+    private fun saveGameImmediately() {
+        viewModelScope.launch {
+            if (YandexGamesManager.isInitialized) {
+                YandexGamesManager.saveGame(state.value.gamerData)
+            }
         }
     }
 
@@ -231,9 +344,6 @@ class MainScreenViewModel : ViewModel() {
         }
     }
 
-    // ИСПРАВЛЕНО ЗДЕСЬ:
-    // 1. Принимаем общий тип MainScreenScreens (а не Shop)
-    // 2. Добавили ветку else для экранов, которые не являются магазином
     private fun getShopName(currentScreen: MainScreenScreens) : String {
         return when (currentScreen) {
             is MainScreenScreens.Shop.BackShop -> "задний фон"

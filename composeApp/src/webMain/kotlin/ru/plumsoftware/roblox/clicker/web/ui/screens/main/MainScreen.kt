@@ -3,8 +3,11 @@ package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,14 +51,20 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +76,7 @@ import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_backgr
 import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.CharacterItem
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts.getNumericFont
 import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
@@ -101,281 +111,425 @@ fun MainScreen() {
             contentDescription = null,
             contentScale = ContentScale.FillBounds
         )
-        Row(modifier = Modifier.fillMaxSize()) {
-            // ---------------------------------------------------------
-            // 1. ЛЕВАЯ ЧАСТЬ (ИГРОВОЕ ПОЛЕ)
-            // ---------------------------------------------------------
-            Column(
-                modifier = Modifier
-                    .weight(1.0f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                // ---------------------------------------------------------
+                // 1. ЛЕВАЯ ЧАСТЬ (ИГРОВОЕ ПОЛЕ)
+                // ---------------------------------------------------------
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, start = 20.dp, end = 20.dp)
+                        .weight(1.0f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // --- КАРТОЧКА МОНЕТ ---
-                    Card(
-                        modifier = Modifier.align(Alignment.Center),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFF9E79F)
-                        ),
-                        shape = MaterialTheme.shapes.medium
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        // --- КАРТОЧКА МОНЕТ ---
+                        Card(
+                            modifier = Modifier.align(Alignment.Center),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFF9E79F)
+                            ),
+                            shape = MaterialTheme.shapes.medium
                         ) {
-                            Image(
-                                modifier = Modifier.size(48.dp),
-                                painter = painterResource(Res.drawable.coin_icon),
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Image(
+                                    modifier = Modifier.size(48.dp),
+                                    painter = painterResource(Res.drawable.coin_icon),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit
+                                )
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
 
 
-                            Text(
-                                text = formatCompactNumber(state.gamerData.coins),
-                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF7D6608),
-                            )
+                                Text(
+                                    text = formatCompactNumber(state.gamerData.coins),
+                                    style = MaterialTheme.typography.displaySmall.copy(fontFamily = getNumericFont()),
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF7D6608),
+                                )
+                            }
+                        }
+
+                        // --- КАРТОЧКА ГЕМОВ ---
+                        Card(
+                            modifier = Modifier.align(Alignment.CenterEnd),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFB3E5FC)
+                            ),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Image(
+                                    modifier = Modifier.size(48.dp),
+                                    painter = painterResource(Res.drawable.gem_icon),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit
+                                )
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Text(
+                                    text = formatCompactNumber(state.gamerData.gems),
+                                    style = MaterialTheme.typography.displaySmall.copy(fontFamily = getNumericFont()),
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0277BD),
+                                )
+                            }
                         }
                     }
 
-                    // --- КАРТОЧКА ГЕМОВ ---
-                    Card(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFB3E5FC)
-                        ),
-                        shape = MaterialTheme.shapes.medium
+                    // Персонаж
+                    val characterInteractionSource = remember { MutableInteractionSource() }
+                    val isPressed by characterInteractionSource.collectIsPressedAsState()
+
+                    val scale by animateFloatAsState(
+                        targetValue = if (isPressed) 0.9f else 1.0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                    )
+
+                    Image(
+                        painter = painterResource(selectedCharacterResource),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .scale(scale)
+                            .clickable(
+                                interactionSource = characterInteractionSource,
+                                indication = null,
+                                onClick = {
+                                    viewModel.onMainCharacterClick()
+                                }
+                            )
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp, end = 0.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        Card(
+                            modifier = Modifier,
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.Black.copy(alpha = 0.3f)
+                            ),
+                            shape = MaterialTheme.shapes.large.copy(
+                                topStart = CornerSize(0.dp), bottomStart = CornerSize(0.dp)
+                            )
                         ) {
-                            Image(
-                                modifier = Modifier.size(48.dp),
-                                painter = painterResource(Res.drawable.gem_icon),
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit
-                            )
+                            Row(
+                                modifier = Modifier.padding(
+                                    start = 40.dp,
+                                    end = 20.dp,
+                                    top = 10.dp,
+                                    bottom = 10.dp
+                                ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    space = 20.dp,
+                                    alignment = Alignment.CenterHorizontally
+                                )
+                            ) {
+                                OutlinedText(
+                                    text = "клик",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    fillColor = Color.White,
+                                    outlineColor = Color.Black,
+                                    strokeWidth = 4f
+                                )
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                                OutlinedText(
+                                    text = formatCompactNumber(GameConfig.allCharacters.first { it.id == state.gamerData.selectedSkinId }.clickPower),
+                                    style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                    fontWeight = FontWeight.Bold,
+                                    fillColor = Color.White,
+                                    outlineColor = Color.Black,
+                                    strokeWidth = 4f
+                                )
+                            }
+                        }
 
-                            Text(
-                                text = formatCompactNumber(state.gamerData.gems),
-                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0277BD),
+                        Card(
+                            modifier = Modifier,
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.Black.copy(alpha = 0.3f)
+                            ),
+                            shape = MaterialTheme.shapes.large.copy(
+                                topEnd = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)
                             )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(
+                                    start = 20.dp,
+                                    end = 40.dp,
+                                    top = 10.dp,
+                                    bottom = 10.dp
+                                ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    space = 20.dp,
+                                    alignment = Alignment.CenterHorizontally
+                                )
+                            ) {
+                                OutlinedText(
+                                    text = "автоклик",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    fillColor = Color.White,
+                                    outlineColor = Color.Black,
+                                    strokeWidth = 4f
+                                )
+
+                                OutlinedText(
+                                    text = formatCompactNumber(state.gamerData.boostId),
+                                    style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                    fontWeight = FontWeight.Bold,
+                                    fillColor = Color.White,
+                                    outlineColor = Color.Black,
+                                    strokeWidth = 4f
+                                )
+                            }
+                        }
+                    }
+
+                    // Тут прогресс бар для накликов для гемов
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        // Считаем прогресс от 0.0 до 1.0
+                        val progressValue = if (state.maxClickProgressForGems > 0) {
+                            (state.gamerData.clickProgressForGems / state.maxClickProgressForGems).toFloat()
+                        } else {
+                            0f
+                        }
+                        // Анимация для плавности
+                        val animatedProgress by animateFloatAsState(
+                            targetValue = progressValue,
+                            animationSpec = tween(durationMillis = 100) // Быстрая анимация
+                        )
+
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .height(30.dp)
+                                .clip(shape = MaterialTheme.shapes.medium)
+                                .fillMaxWidth()
+                                .weight(1.0f)
+                                .border(1.dp, Color.Black, MaterialTheme.shapes.medium),
+                            trackColor = Color(0xFFB3E5FC).copy(alpha = 0.5f),
+                            color = Color(0xFF00B0FF), // Ярко-синий
+                            gapSize = 0.dp,
+                            progress = {
+                                if (state.maxClickProgressForGems > 0)
+                                    (state.gamerData.clickProgressForGems / state.maxClickProgressForGems).toFloat()
+                                else 0f
+                            } // Используем анимированное значение
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        val unclaimedCount = state.gamerData.unclaimedGems
+                        // Иконка гема справа (можно сделать кликабельной или анимированной при получении гема)
+                        Card(
+                            modifier = Modifier,
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFB3E5FC)
+                            ),
+                            shape = MaterialTheme.shapes.medium,
+                            onClick = {
+                                if (unclaimedCount > 0) viewModel.onEvent(MainScreenPack.Event.onClaimGemsClick)
+                            }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                // Если есть награда, показываем число
+                                if (unclaimedCount > 0) {
+                                    Text(
+                                        text = "+$unclaimedCount",
+                                        style = MaterialTheme.typography.displaySmall.copy(fontFamily = getNumericFont()),
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF0277BD)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
+
+                                Image(
+                                    modifier = Modifier.size(38.dp).rotate(30f),
+                                    painter = painterResource(Res.drawable.gem_icon),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
                         }
                     }
                 }
 
-                // Персонаж
-                val characterInteractionSource = remember { MutableInteractionSource() }
-                val isPressed by characterInteractionSource.collectIsPressedAsState()
-
-                val scale by animateFloatAsState(
-                    targetValue = if (isPressed) 0.9f else 1.0f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
-                )
-
-                Image(
-                    painter = painterResource(selectedCharacterResource),
-                    contentDescription = null,
+                // ---------------------------------------------------------
+                // 2. ПРАВАЯ ЧАСТЬ (МАГАЗИН)
+                // ---------------------------------------------------------
+                Column(
                     modifier = Modifier
-                        .weight(1.0f)
-                        .scale(scale)
-                        .clickable(
-                            interactionSource = characterInteractionSource,
-                            indication = null,
-                            onClick = {
-                                viewModel.onMainCharacterClick()
-                            }
-                        )
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp, end = 0.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .width(570.dp)
+                        .fillMaxHeight()
+                        .background(Color.Black.copy(alpha = 0.4f)),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Card(
-                        modifier = Modifier,
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Black.copy(alpha = 0.3f)
-                        ),
-                        shape = MaterialTheme.shapes.large.copy(
-                            topStart = CornerSize(0.dp), bottomStart = CornerSize(0.dp)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                start = 40.dp,
-                                end = 20.dp,
-                                top = 10.dp,
-                                bottom = 10.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(
-                                space = 20.dp,
-                                alignment = Alignment.CenterHorizontally
-                            )
-                        ) {
-                            OutlinedText(
-                                text = "клик",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                fillColor = Color.White,
-                                outlineColor = Color.Black,
-                                strokeWidth = 4f
-                            )
+                    // Заголовок магазина
+                    OutlinedText(
+                        modifier = Modifier.padding(vertical = 24.dp),
+                        text = "магазин",
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Black,
+                        fillColor = Color.White,
+                        outlineColor = Color.Black,
+                        strokeWidth = 6f // Заголовок жирнее
+                    )
 
-                            OutlinedText(
-                                text = formatCompactNumber(GameConfig.allCharacters.first { it.id == state.gamerData.selectedSkinId }.clickPower),
-                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
-                                fontWeight = FontWeight.Bold,
-                                fillColor = Color.White,
-                                outlineColor = Color.Black,
-                                strokeWidth = 4f
-                            )
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        // --- МЕНЮ ---
+                        Column(
+                            modifier = Modifier
+                                .width(190.dp)
+                                .fillMaxHeight()
+                                .background(Color.Black.copy(alpha = 0.2f))
+                                .padding(top = 20.dp, start = 16.dp, end = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            ShopMenuItem(text = "герои") {
+                                viewModel.onEvent(MainScreenPack.Event.onHeroClick())
+                            }
+                            ShopMenuItem(text = "бусты") {
+                                viewModel.onEvent(MainScreenPack.Event.onBoostClick())
+                            }
+                            ShopMenuItem(text = "звуки") {
+                                viewModel.onEvent(MainScreenPack.Event.onSoundsClick())
+                            }
+                            ShopMenuItem(text = "фоны") {
+                                viewModel.onEvent(MainScreenPack.Event.onBackClick())
+                            }
                         }
-                    }
 
-                    Card(
-                        modifier = Modifier,
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Black.copy(alpha = 0.3f)
-                        ),
-                        shape = MaterialTheme.shapes.large.copy(
-                            topEnd = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                start = 20.dp,
-                                end = 40.dp,
-                                top = 10.dp,
-                                bottom = 10.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(
-                                space = 20.dp,
-                                alignment = Alignment.CenterHorizontally
-                            )
+                        // --- КОНТЕНТ ---
+                        // СПИСОК ТОВАРОВ
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            OutlinedText(
-                                text = "автоклик",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                fillColor = Color.White,
-                                outlineColor = Color.Black,
-                                strokeWidth = 4f
-                            )
-
-                            OutlinedText(
-                                text = formatCompactNumber(state.gamerData.boostId),
-                                style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
-                                fontWeight = FontWeight.Bold,
-                                fillColor = Color.White,
-                                outlineColor = Color.Black,
-                                strokeWidth = 4f
-                            )
+                            LazyColumn(
+                                contentPadding = PaddingValues(vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                if (state.currentScreen is MainScreenScreens.Shop.HeroShop) {
+                                    items(state.charactersList) { character ->
+                                        CharacterItem(
+                                            character = character,
+                                            onClick = { viewModel.onShopItemClick(character) }
+                                        )
+                                    }
+                                } else {
+                                    // Заглушка для других вкладок
+                                    item {
+                                        Text("Этот раздел в разработке...", color = Color.Gray)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // ---------------------------------------------------------
-            // 2. ПРАВАЯ ЧАСТЬ (МАГАЗИН)
-            // ---------------------------------------------------------
-            Column(
-                modifier = Modifier
-                    .width(570.dp)
-                    .fillMaxHeight()
-                    .background(Color.Black.copy(alpha = 0.4f)),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Заголовок магазина
-                OutlinedText(
-                    modifier = Modifier.padding(vertical = 24.dp),
-                    text = "магазин",
-                    style = MaterialTheme.typography.displayMedium,
-                    fontWeight = FontWeight.Black,
-                    fillColor = Color.White,
-                    outlineColor = Color.Black,
-                    strokeWidth = 6f // Заголовок жирнее
-                )
+            // --- ДИАЛОГОВОЕ ОКНО (ПОВЕРХ ВСЕГО) ---
+            if (state.currentMainScreenDialog is MainScreenDialog.MainDialog.ClaimGemsDialog) {
+                val gemsAmount = (state.currentMainScreenDialog as MainScreenDialog.MainDialog.ClaimGemsDialog).amount
 
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.Start
+                // Затемнение фона
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .clickable(enabled = false) {},
+                    contentAlignment = Alignment.Center
                 ) {
-                    // --- МЕНЮ ---
-                    Column(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .fillMaxHeight()
-                            .background(Color.Black.copy(alpha = 0.2f))
-                            .padding(top = 20.dp, start = 16.dp, end = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalAlignment = Alignment.Start
+                    Card(
+                        modifier = Modifier.width(300.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = MaterialTheme.shapes.large,
+                        border = BorderStroke(4.dp, Color.Black)
                     ) {
-                        ShopMenuItem(text = "герои") {
-                            viewModel.onEvent(MainScreenPack.Event.onHeroClick())
-                        }
-                        ShopMenuItem(text = "бусты") {
-                            viewModel.onEvent(MainScreenPack.Event.onBoostClick())
-                        }
-                        ShopMenuItem(text = "звуки") {
-                            viewModel.onEvent(MainScreenPack.Event.onSoundsClick())
-                        }
-                        ShopMenuItem(text = "фоны") {
-                            viewModel.onEvent(MainScreenPack.Event.onBackClick())
-                        }
-                    }
-
-                    // --- КОНТЕНТ ---
-                    // СПИСОК ТОВАРОВ
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        LazyColumn(
-                            contentPadding = PaddingValues(vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        Column(
+                            modifier = Modifier.padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            if (state.currentScreen is MainScreenScreens.Shop.HeroShop) {
-                                items(state.charactersList) { character ->
-                                    CharacterItem(
-                                        character = character,
-                                        onClick = { viewModel.onShopItemClick(character) }
-                                    )
-                                }
-                            } else {
-                                // Заглушка для других вкладок
-                                item {
-                                    Text("Этот раздел в разработке...", color = Color.Gray)
-                                }
+                            OutlinedText(
+                                text = "награда!",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                fillColor = Color(0xFFFFD600), // Золотой
+                                outlineColor = Color.Black
+                            )
+
+                            Image(
+                                painter = painterResource(Res.drawable.gem_icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(80.dp)
+                            )
+
+                            OutlinedText(
+                                text = "+$gemsAmount ГЕМОВ",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                fillColor = Color(0xFF0277BD), // Синий
+                                outlineColor = Color.Black
+                            )
+
+                            Button(
+                                onClick = { viewModel.onEvent(MainScreenPack.Event.onCloseDialog) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
+                                border = BorderStroke(0.dp, Color.Black),
+                                shape = MaterialTheme.shapes.medium,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "забрать",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
                             }
                         }
                     }

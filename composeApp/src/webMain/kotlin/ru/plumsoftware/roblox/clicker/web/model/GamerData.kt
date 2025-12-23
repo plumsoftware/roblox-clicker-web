@@ -2,7 +2,7 @@ package ru.plumsoftware.roblox.clicker.web.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable // Эту аннотацию дает библиотека, она важна!
+@Serializable
 data class GamerData(
     val coins: Long = 0,
     val gems: Long = 0,
@@ -14,5 +14,11 @@ data class GamerData(
     val boostId: Int = 0,
 
     // Список ID купленных персонажей. По умолчанию только ID 1.
-    val unlockedCharacterIds: List<Int> = listOf(1)
+    val unlockedCharacterIds: List<Int> = listOf(1),
+
+    // Прогресс кликов для гемов
+    val clickProgressForGems: Double = 0.0,
+
+    // Накопленные гемы (которые лежат в карточке)
+    val unclaimedGems: Long = 0,
 )

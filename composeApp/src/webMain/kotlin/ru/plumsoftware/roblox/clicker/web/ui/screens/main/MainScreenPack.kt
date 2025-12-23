@@ -13,6 +13,9 @@ object MainScreenPack {
         class onSoundsClick : Event
         class onBackClick : Event
         class onBoostClick : Event
+
+        object onClaimGemsClick : Event // Ивент нажатия на карточку с гемами
+        object onCloseDialog : Event // Закрыть диалог
     }
 
     sealed interface Effect {
@@ -31,7 +34,10 @@ object MainScreenPack {
 
         val isLoading: Boolean,
         val gamerData: GamerData,
-        val charactersList: List<GameCharacter>
+        val charactersList: List<GameCharacter>,
+
+        val clickPowerForGems: Double,
+        val maxClickProgressForGems: Double
     ) {
         companion object {
             fun default() = MainScreenState(
@@ -41,7 +47,10 @@ object MainScreenPack {
 
                 isLoading = false,
                 gamerData = GamerData(),
-                charactersList = emptyList()
+                charactersList = emptyList(),
+
+                clickPowerForGems = 0.0,
+                maxClickProgressForGems = 0.0
             )
         }
     }

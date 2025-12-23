@@ -20,7 +20,7 @@ fun OutlinedText(
     fontWeight: FontWeight? = null,
     fillColor: Color = Color.White, // Цвет внутри букв
     outlineColor: Color = Color.Black, // Цвет обводки
-    strokeWidth: Float = 3f, // Толщина обводки
+    strokeWidth: Float = 1.5f, // Толщина обводки
     textAlign: TextAlign? = null
 ) {
     val mergedStyle = style.merge(TextStyle(fontWeight = fontWeight))
