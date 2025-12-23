@@ -75,6 +75,7 @@ import roblox_clicker_web.composeapp.generated.resources.homeless
 import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_background
 import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.BackgroundCard
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.CharacterItem
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
@@ -85,6 +86,11 @@ import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
 fun MainScreen() {
     val viewModel: MainScreenViewModel = koinViewModel()
     val state by viewModel.state.collectAsState()
+
+    val currentBackgroundResource = remember(state.gamerData.selectedBackgroundId) {
+        state.backgroundsList.find { it.isSelected }?.resourceName
+            ?: Res.drawable.minecraft_forest_background // Дефолт
+    }
 
     // Логика поиска картинки выбранного персонажа
     val selectedCharacterResource = remember(state.gamerData.selectedSkinId) {
@@ -105,9 +111,11 @@ fun MainScreen() {
     }
 
     Scaffold {
+        // ФОН ЭКРАНА
         Image(
             modifier = Modifier.fillMaxSize(),
-            painter = painterResource(Res.drawable.minecraft_forest_background),
+            // Используем динамический ресурс
+            painter = painterResource(currentBackgroundResource),
             contentDescription = null,
             contentScale = ContentScale.FillBounds
         )
@@ -479,7 +487,17 @@ fun MainScreen() {
                                             onClick = { viewModel.onShopItemClick(character) }
                                         )
                                     }
-                                } else {
+                                }
+                                // Вкладка ФОНОВ (BackShop)
+                                else if (state.currentScreen is MainScreenScreens.Shop.BackShop) {
+                                    items(state.backgroundsList) { background ->
+                                        BackgroundCard(
+                                            background = background,
+                                            onClick = { viewModel.onBackgroundItemClick(background) }
+                                        )
+                                    }
+                                }
+                                else {
                                     // Заглушка для других вкладок
                                     item {
                                         Text("Этот раздел в разработке...", color = Color.Gray)

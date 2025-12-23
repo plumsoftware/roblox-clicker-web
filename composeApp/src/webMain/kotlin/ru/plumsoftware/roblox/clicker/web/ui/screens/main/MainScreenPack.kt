@@ -1,5 +1,6 @@
 package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 
+import ru.plumsoftware.roblox.clicker.web.model.Background
 import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
 import ru.plumsoftware.roblox.clicker.web.model.GamerData
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
@@ -40,7 +41,9 @@ object MainScreenPack {
         val maxClickProgressForGems: Double,
 
         val isStartedBgMusic: Boolean,
-        val isSoundOn: Boolean
+        val isSoundOn: Boolean,
+
+        val backgroundsList: List<Background>
     ) {
         companion object {
             fun default() = MainScreenState(
@@ -56,7 +59,9 @@ object MainScreenPack {
                 maxClickProgressForGems = 0.0,
 
                 isStartedBgMusic = false,
-                isSoundOn = true
+                isSoundOn = true,
+
+                backgroundsList = emptyList(),
             )
         }
     }

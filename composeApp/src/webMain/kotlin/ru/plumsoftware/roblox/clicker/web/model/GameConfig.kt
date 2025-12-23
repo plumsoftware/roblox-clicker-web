@@ -4,18 +4,25 @@ import roblox_clicker_web.composeapp.generated.resources.Res
 import roblox_clicker_web.composeapp.generated.resources.amethysto
 import roblox_clicker_web.composeapp.generated.resources.apple_valacas
 import roblox_clicker_web.composeapp.generated.resources.atomic_waste
+import roblox_clicker_web.composeapp.generated.resources.back_3
+import roblox_clicker_web.composeapp.generated.resources.back_9
 import roblox_clicker_web.composeapp.generated.resources.bird
 import roblox_clicker_web.composeapp.generated.resources.bombardiro_crocadilo
+import roblox_clicker_web.composeapp.generated.resources.brawl_starts_background
 import roblox_clicker_web.composeapp.generated.resources.builder_1
 import roblox_clicker_web.composeapp.generated.resources.capitan_roblox_1
 import roblox_clicker_web.composeapp.generated.resources.cosminus_5
 import roblox_clicker_web.composeapp.generated.resources.darkmatter
 import roblox_clicker_web.composeapp.generated.resources.flex
 import roblox_clicker_web.composeapp.generated.resources.homeless
+import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_background
 import roblox_clicker_web.composeapp.generated.resources.monster
 import roblox_clicker_web.composeapp.generated.resources.neon_overdrive_roblox_11
 import roblox_clicker_web.composeapp.generated.resources.ninja
 import roblox_clicker_web.composeapp.generated.resources.ninja_smoking
+import roblox_clicker_web.composeapp.generated.resources.roblox_background
+import roblox_clicker_web.composeapp.generated.resources.roblox_castle_background
+import roblox_clicker_web.composeapp.generated.resources.roblox_doors_background
 import roblox_clicker_web.composeapp.generated.resources.secret_roblox_7
 import roblox_clicker_web.composeapp.generated.resources.shrecus
 import roblox_clicker_web.composeapp.generated.resources.skuf_shek
@@ -23,6 +30,7 @@ import roblox_clicker_web.composeapp.generated.resources.spider
 import roblox_clicker_web.composeapp.generated.resources.squid_game_guardian
 import roblox_clicker_web.composeapp.generated.resources.super_roblox_6
 import roblox_clicker_web.composeapp.generated.resources.tigris_roblox_10
+import roblox_clicker_web.composeapp.generated.resources.tualet_shreka_background
 
 object GameConfig {
     val allCharacters = listOf(
@@ -235,5 +243,58 @@ object GameConfig {
             isSelected = false,
             isUnlocked = false
         )
+    )
+
+    val allBackgrounds = listOf(
+        Background(
+            id = 1,
+            name = "Пиксельный лес",
+            resourceName = Res.drawable.minecraft_forest_background,
+            price = 0, // Бесплатно
+            isSelected = true,
+            isUnlocked = true
+        ),
+        Background(
+            id = 2,
+            name = "Порт",
+            resourceName = Res.drawable.roblox_background,
+            price = 5 // 5 Гемов
+        ),
+        Background(
+            id = 3,
+            name = "Двери",
+            resourceName = Res.drawable.roblox_doors_background,
+            price = 15
+        ),
+        Background(
+            id = 4,
+            name = "Замок",
+            resourceName = Res.drawable.roblox_castle_background,
+            price = 30
+        ),
+        Background(
+            id = 5,
+            name = "Ковбои",
+            resourceName = Res.drawable.brawl_starts_background,
+            price = 50
+        ),
+        Background(
+            id = 6,
+            name = "Комната раздумий",
+            resourceName = Res.drawable.tualet_shreka_background,
+            price = 100
+        ),
+        Background(
+            id = 7,
+            name = "Надзератели",
+            resourceName = Res.drawable.back_9,
+            price = 200
+        ),
+        Background(
+            id = 8,
+            name = "Лес",
+            resourceName = Res.drawable.back_3,
+            price = 500
+        ),
     )
 }

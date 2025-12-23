@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import ru.plumsoftware.roblox.clicker.web.model.Background
 import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
 import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.model.GamerData
@@ -34,6 +35,7 @@ class MainScreenViewModel : ViewModel() {
         // При старте считаем, какая должна быть цель
         recalculateGemTarget(state.value.gamerData)
         updateCharactersList(state.value.gamerData)
+        updateBackgroundsList(state.value.gamerData)
     }
 
     // --- ЛОГИКА ДАННЫХ (ЭКОНОМИКА) ---
@@ -51,14 +53,19 @@ class MainScreenViewModel : ViewModel() {
             if (loadedData == null) {
                 loadedData = GamerData()
             } else {
-                // ЗАЩИТА ОТ СТАРЫХ СОХРАНЕНИЙ:
-                // Если вдруг пришел id=0 (старый баг), принудительно ставим 1
                 if (loadedData.selectedSkinId == 0) {
                     loadedData = loadedData.copy(selectedSkinId = 1)
                 }
                 // Если список купленных пуст (старый баг), добавляем туда 1
                 if (loadedData.unlockedCharacterIds.isEmpty()) {
                     loadedData = loadedData.copy(unlockedCharacterIds = listOf(1))
+                }
+
+                if (loadedData.unlockedBackgroundIds.isEmpty()) {
+                    loadedData = loadedData.copy(unlockedBackgroundIds = listOf(1))
+                }
+                if (loadedData.selectedBackgroundId == 0) {
+                    loadedData = loadedData.copy(selectedBackgroundId = 1)
                 }
             }
 
@@ -67,13 +74,83 @@ class MainScreenViewModel : ViewModel() {
                 it.copy(
                     gamerData = loadedData,
                     // Сразу обновляем визуальный список
-                    charactersList = mapDataToCharacters(loadedData)
+                    charactersList = mapDataToCharacters(loadedData),
+                    backgroundsList = mapDataToBackgrounds(loadedData)
                 )
             }
             println("MainVM: Data loaded! Coins: ${loadedData.coins}")
         }.invokeOnCompletion {
             setupClickPowerForGems()
         }
+    }
+
+    // --- ЛОГИКА ФОНОВ ---
+
+    fun onBackgroundItemClick(background: Background) {
+        val currentData = state.value.gamerData
+
+        // 1. Уже куплен -> Выбираем
+        if (currentData.unlockedBackgroundIds.contains(background.id)) {
+            selectBackground(background.id)
+            return
+        }
+
+        // 2. Покупка (ЗА ГЕМЫ!)
+        if (currentData.gems >= background.price) {
+            buyAndSelectBackground(background)
+        } else {
+            println("Not enough gems!")
+        }
+    }
+
+    private fun selectBackground(id: Int) {
+        state.update { oldState ->
+            val newData = oldState.gamerData.copy(selectedBackgroundId = id)
+            oldState.copy(
+                gamerData = newData,
+                backgroundsList = mapDataToBackgrounds(newData)
+            )
+        }
+    }
+
+    private fun buyAndSelectBackground(background: Background) {
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+
+            // Тратим ГЕМЫ
+            val newData = oldData.copy(
+                gems = oldData.gems - background.price,
+                unlockedBackgroundIds = oldData.unlockedBackgroundIds + background.id,
+                selectedBackgroundId = background.id
+            )
+
+            oldState.copy(
+                gamerData = newData,
+                backgroundsList = mapDataToBackgrounds(newData)
+            )
+        }
+        AudioManager.playSound("buy-1.mp3")
+
+        viewModelScope.launch {
+            if (YandexGamesManager.isInitialized) {
+                YandexGamesManager.saveGame(state.value.gamerData)
+            }
+        }
+    }
+
+    // Маппер для фонов
+    private fun mapDataToBackgrounds(data: GamerData): List<Background> {
+        return GameConfig.allBackgrounds.map { staticBg ->
+            staticBg.copy(
+                isUnlocked = data.unlockedBackgroundIds.contains(staticBg.id),
+                isSelected = data.selectedBackgroundId == staticBg.id
+            )
+        }
+    }
+
+    // Вспомогательная
+    private fun updateBackgroundsList(data: GamerData) {
+        state.update { it.copy(backgroundsList = mapDataToBackgrounds(data)) }
     }
 
     private fun startAutoSave() {

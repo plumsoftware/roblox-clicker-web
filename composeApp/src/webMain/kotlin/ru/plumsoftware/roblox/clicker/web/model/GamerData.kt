@@ -10,7 +10,6 @@ data class GamerData(
     // ID выбранных предметов (0 = дефолт)
     val selectedSkinId: Int = 1,
     val selectedMusicId: Int = 0,
-    val selectedBackgroundId: Int = 0,
     val boostId: Int = 0,
 
     // Список ID купленных персонажей. По умолчанию только ID 1.
@@ -21,4 +20,8 @@ data class GamerData(
 
     // Накопленные гемы (которые лежат в карточке)
     val unclaimedGems: Long = 0,
+
+    // --- ФОНЫ ---
+    val selectedBackgroundId: Int = 1,          // ID 1 выбран по умолчанию
+    val unlockedBackgroundIds: List<Int> = listOf(1), // ID 1 куплен сразу
 )
