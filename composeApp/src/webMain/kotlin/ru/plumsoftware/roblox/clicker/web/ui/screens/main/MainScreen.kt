@@ -76,6 +76,7 @@ import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_backgr
 import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.BackgroundCard
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.BoostCard
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.CharacterItem
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
@@ -90,6 +91,10 @@ fun MainScreen() {
     val currentBackgroundResource = remember(state.gamerData.selectedBackgroundId) {
         state.backgroundsList.find { it.isSelected }?.resourceName
             ?: Res.drawable.minecraft_forest_background // Дефолт
+    }
+
+    val currentAutoIncome = state.gamerData.unlockedBoostIds.sumOf { id ->
+        GameConfig.allBoosts.find { it.id == id }?.income ?: 0
     }
 
     // Логика поиска картинки выбранного персонажа
@@ -328,7 +333,7 @@ fun MainScreen() {
                                 )
 
                                 OutlinedText(
-                                    text = formatCompactNumber(state.gamerData.boostId),
+                                    text = formatCompactNumber(currentAutoIncome),
                                     style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     fillColor = Color.White,
@@ -458,9 +463,9 @@ fun MainScreen() {
                             ShopMenuItem(text = "бусты") {
                                 viewModel.onEvent(MainScreenPack.Event.onBoostClick())
                             }
-                            ShopMenuItem(text = "звуки") {
-                                viewModel.onEvent(MainScreenPack.Event.onSoundsClick())
-                            }
+//                            ShopMenuItem(text = "звуки") {
+//                                viewModel.onEvent(MainScreenPack.Event.onSoundsClick())
+//                            }
                             ShopMenuItem(text = "фоны") {
                                 viewModel.onEvent(MainScreenPack.Event.onBackClick())
                             }
@@ -494,6 +499,16 @@ fun MainScreen() {
                                         BackgroundCard(
                                             background = background,
                                             onClick = { viewModel.onBackgroundItemClick(background) }
+                                        )
+                                    }
+                                }
+                                else if (state.currentScreen is MainScreenScreens.Shop.BoostShop) {
+                                    items(GameConfig.allBoosts) { boost ->
+                                        BoostCard(
+                                            boost = boost,
+                                            // Проверяем, куплен ли
+                                            isUnlocked = state.gamerData.unlockedBoostIds.contains(boost.id),
+                                            onClick = { viewModel.onBoostItemClick(boost) }
                                         )
                                     }
                                 }

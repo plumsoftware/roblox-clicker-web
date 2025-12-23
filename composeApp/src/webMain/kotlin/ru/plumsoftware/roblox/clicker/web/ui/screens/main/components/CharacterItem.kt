@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import roblox_clicker_web.composeapp.generated.resources.Res
@@ -96,13 +97,29 @@ fun CharacterItem(
             // Цена или Статус
             if (character.isUnlocked) {
                 if (character.isSelected) {
-                    Text("выбран", color = Color.Green, fontWeight = FontWeight.Medium)
+                    Text(
+                        "выбран",
+                        color = Color.Green,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
                 } else {
-                    Text("куплено", color = Color.Gray, fontWeight = FontWeight.Medium)
+                    Text(
+                        "куплено",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
                 }
             } else {
                 // Цена
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
                     Text(
                         text = formatCompactNumber(character.price),
                         style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),

@@ -24,4 +24,7 @@ data class GamerData(
     // --- ФОНЫ ---
     val selectedBackgroundId: Int = 1,          // ID 1 выбран по умолчанию
     val unlockedBackgroundIds: List<Int> = listOf(1), // ID 1 куплен сразу
+
+    // Список купленных бустов
+    val unlockedBoostIds: List<Int> = emptyList()
 )

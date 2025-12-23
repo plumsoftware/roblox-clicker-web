@@ -13,12 +13,14 @@ import kotlinx.coroutines.withContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import ru.plumsoftware.roblox.clicker.web.model.Background
+import ru.plumsoftware.roblox.clicker.web.model.GameBoost
 import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
 import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.model.GamerData
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.utils.AudioManager
+import ru.plumsoftware.roblox.clicker.web.utils.GameLifecycle
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
 
 class MainScreenViewModel : ViewModel() {
@@ -36,6 +38,84 @@ class MainScreenViewModel : ViewModel() {
         recalculateGemTarget(state.value.gamerData)
         updateCharactersList(state.value.gamerData)
         updateBackgroundsList(state.value.gamerData)
+
+        // ЗАПУСКАЕМ ТАЙМЕР ПАССИВНОГО ДОХОДА
+        startPassiveIncomeLoop()
+    }
+
+    // --- ПАССИВНЫЙ ДОХОД ---
+    private fun startPassiveIncomeLoop() {
+        viewModelScope.launch {
+            while (true) {
+                // 1. Ждем секунду
+                delay(1000)
+
+                // 2. ПРОВЕРКА: Если вкладка свернута - пропускаем ход
+                if (!GameLifecycle.isGameActive.value) {
+                    continue
+                }
+
+                val currentData = state.value.gamerData
+                val totalIncome = calculateTotalIncome(currentData.unlockedBoostIds)
+
+                if (totalIncome > 0) {
+                    state.update { oldState ->
+                        val newData = oldState.gamerData.copy(
+                            coins = oldState.gamerData.coins + totalIncome
+                        )
+                        oldState.copy(gamerData = newData)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun calculateTotalIncome(boostIds: List<Int>): Long {
+        // 1. Если ничего не куплено -> доход 0
+        if (boostIds.isEmpty()) return 0
+
+        // 2. Находим максимальный ID среди купленных (это и есть "последний/лучший" буст)
+        val bestBoostId = boostIds.maxOrNull() ?: return 0
+
+        // 3. Ищем его в конфиге и возвращаем его доход
+        return GameConfig.allBoosts.find { it.id == bestBoostId }?.income ?: 0
+    }
+
+    // --- ПОКУПКА БУСТА ---
+    fun onBoostItemClick(boost: GameBoost) {
+        val currentData = state.value.gamerData
+
+        // Если уже куплен (для уникальных бустов)
+        if (currentData.unlockedBoostIds.contains(boost.id)) {
+            // Можно добавить тост "Уже куплено"
+            return
+        }
+
+        // Проверка цены (может стоить И монеты, И гемы)
+        val enoughCoins = currentData.coins >= boost.priceCoins
+        val enoughGems = currentData.gems >= boost.priceGems
+
+        if (enoughCoins && enoughGems) {
+            buyBoost(boost)
+        } else {
+            println("Not enough currency!")
+        }
+    }
+
+    private fun buyBoost(boost: GameBoost) {
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+
+            val newData = oldData.copy(
+                coins = oldData.coins - boost.priceCoins,
+                gems = oldData.gems - boost.priceGems,
+                unlockedBoostIds = oldData.unlockedBoostIds + boost.id
+            )
+
+            oldState.copy(gamerData = newData)
+        }
+        AudioManager.playSound("buy-1.mp3")
+        saveGameImmediately()
     }
 
     // --- ЛОГИКА ДАННЫХ (ЭКОНОМИКА) ---
