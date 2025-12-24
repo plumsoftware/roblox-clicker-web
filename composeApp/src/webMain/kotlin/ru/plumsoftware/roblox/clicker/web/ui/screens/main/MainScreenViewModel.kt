@@ -80,7 +80,15 @@ class MainScreenViewModel : ViewModel() {
         val bestBoostId = boostIds.maxOrNull() ?: return 0
 
         // 3. Ищем его в конфиге и возвращаем его доход
-        return GameConfig.allBoosts.find { it.id == bestBoostId }?.income ?: 0
+        val totalIncome =  GameConfig.allBoosts.find { it.id == bestBoostId }?.income ?: 0
+
+        state.update {
+            it.copy(
+                totalIncome = totalIncome
+            )
+        }
+
+        return totalIncome
     }
 
     // --- ПОКУПКА БУСТА ---
@@ -241,7 +249,7 @@ class MainScreenViewModel : ViewModel() {
     private fun startAutoSave() {
         viewModelScope.launch {
             while (true) {
-                delay(30_000)
+                delay(10_000)
                 if (YandexGamesManager.isInitialized) {
                     YandexGamesManager.saveGame(state.value.gamerData)
                     println("MainVM: Auto-saved!")

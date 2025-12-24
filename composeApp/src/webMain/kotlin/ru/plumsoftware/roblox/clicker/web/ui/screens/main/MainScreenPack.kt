@@ -43,7 +43,8 @@ object MainScreenPack {
         val isStartedBgMusic: Boolean,
         val isSoundOn: Boolean,
 
-        val backgroundsList: List<Background>
+        val backgroundsList: List<Background>,
+        val totalIncome: Long
     ) {
         companion object {
             fun default() = MainScreenState(
@@ -62,6 +63,7 @@ object MainScreenPack {
                 isSoundOn = true,
 
                 backgroundsList = emptyList(),
+                totalIncome = 0
             )
         }
     }

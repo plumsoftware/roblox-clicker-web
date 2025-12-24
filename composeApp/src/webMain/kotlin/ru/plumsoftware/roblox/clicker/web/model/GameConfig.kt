@@ -1,36 +1,6 @@
 package ru.plumsoftware.roblox.clicker.web.model
 
-import roblox_clicker_web.composeapp.generated.resources.Res
-import roblox_clicker_web.composeapp.generated.resources.amethysto
-import roblox_clicker_web.composeapp.generated.resources.apple_valacas
-import roblox_clicker_web.composeapp.generated.resources.atomic_waste
-import roblox_clicker_web.composeapp.generated.resources.back_3
-import roblox_clicker_web.composeapp.generated.resources.back_9
-import roblox_clicker_web.composeapp.generated.resources.bird
-import roblox_clicker_web.composeapp.generated.resources.bombardiro_crocadilo
-import roblox_clicker_web.composeapp.generated.resources.brawl_starts_background
-import roblox_clicker_web.composeapp.generated.resources.builder_1
-import roblox_clicker_web.composeapp.generated.resources.capitan_roblox_1
-import roblox_clicker_web.composeapp.generated.resources.cosminus_5
-import roblox_clicker_web.composeapp.generated.resources.darkmatter
-import roblox_clicker_web.composeapp.generated.resources.flex
-import roblox_clicker_web.composeapp.generated.resources.homeless
-import roblox_clicker_web.composeapp.generated.resources.minecraft_forest_background
-import roblox_clicker_web.composeapp.generated.resources.monster
-import roblox_clicker_web.composeapp.generated.resources.neon_overdrive_roblox_11
-import roblox_clicker_web.composeapp.generated.resources.ninja
-import roblox_clicker_web.composeapp.generated.resources.ninja_smoking
-import roblox_clicker_web.composeapp.generated.resources.roblox_background
-import roblox_clicker_web.composeapp.generated.resources.roblox_castle_background
-import roblox_clicker_web.composeapp.generated.resources.roblox_doors_background
-import roblox_clicker_web.composeapp.generated.resources.secret_roblox_7
-import roblox_clicker_web.composeapp.generated.resources.shrecus
-import roblox_clicker_web.composeapp.generated.resources.skuf_shek
-import roblox_clicker_web.composeapp.generated.resources.spider
-import roblox_clicker_web.composeapp.generated.resources.squid_game_guardian
-import roblox_clicker_web.composeapp.generated.resources.super_roblox_6
-import roblox_clicker_web.composeapp.generated.resources.tigris_roblox_10
-import roblox_clicker_web.composeapp.generated.resources.tualet_shreka_background
+import roblox_clicker_web.composeapp.generated.resources.*
 
 object GameConfig {
     val allCharacters = listOf(
@@ -300,31 +270,35 @@ object GameConfig {
 
     val allBoosts = listOf(
         // --- TIER 1: Слабые (За монеты) ---
-        GameBoost(1, "младший брат", Res.drawable.homeless, income = 1, priceCoins = 100),
-        GameBoost(2, "авто-кликер v1", Res.drawable.builder_1, income = 5, priceCoins = 500),
-        GameBoost(3, "старая мышка", Res.drawable.bird, income = 15, priceCoins = 1_500),
-        GameBoost(4, "залипшая клавиша", Res.drawable.skuf_shek, income = 40, priceCoins = 5_000),
-        GameBoost(5, "макрос на луа", Res.drawable.spider, income = 100, priceCoins = 15_000),
+        // Начальный уровень: школьники, нубы и дерево
+        GameBoost(1, "нубик с телефоном", Res.drawable.boost_1, income = 1, priceCoins = 100),
+        GameBoost(2, "деревянная кирка", Res.drawable.boost_2, income = 5, priceCoins = 500),
+        GameBoost(3, "кусты из бравла", Res.drawable.boost_3, income = 15, priceCoins = 1_500),
+        GameBoost(4, "Жора", Res.drawable.boost_4, income = 40, priceCoins = 5_000),
+        GameBoost(5, "бесплатные робуксы", Res.drawable.boost_5, income = 100, priceCoins = 15_000),
 
         // --- TIER 2: Средние (Дорогие монеты) ---
-        GameBoost(6, "офисный планктон", Res.drawable.shrecus, income = 250, priceCoins = 50_000),
-        GameBoost(7, "игровая мышь", Res.drawable.ninja, income = 600, priceCoins = 150_000),
-        GameBoost(8, "механическая клава", Res.drawable.ninja_smoking, income = 1_500, priceCoins = 500_000),
-        GameBoost(9, "ферма телефонов", Res.drawable.squid_game_guardian, income = 4_000, priceCoins = 1_500_000),
-        GameBoost(10, "скрипт-кидди", Res.drawable.bombardiro_crocadilo, income = 10_000, priceCoins = 5_000_000),
+        // Уровень "Продвинутый": трейды, мобы и донат
+        GameBoost(6, "пудж", Res.drawable.boost_6, income = 250, priceCoins = 50_000),
+        GameBoost(7, "житель", Res.drawable.boost_7, income = 600, priceCoins = 150_000),
+        GameBoost(8, "эль примо с ультой", Res.drawable.boost_8, income = 1_500, priceCoins = 500_000),
+        GameBoost(9, "спавнер мобов", Res.drawable.boost_9, income = 4_000, priceCoins = 1_500_000),
+        GameBoost(10, "голем", Res.drawable.boost_10, income = 10_000, priceCoins = 5_000_000),
 
         // --- TIER 3: Мощные (За Гемы) ---
-        GameBoost(11, "облачный сервер", Res.drawable.monster, income = 25_000, priceGems = 10),
-        GameBoost(12, "нейросеть", Res.drawable.atomic_waste, income = 60_000, priceGems = 30),
-        GameBoost(13, "крипто-майнер", Res.drawable.amethysto, income = 150_000, priceGems = 75),
-        GameBoost(14, "взлом пентагона", Res.drawable.capitan_roblox_1, income = 400_000, priceGems = 150),
-        GameBoost(15, "искусственный ии", Res.drawable.cosminus_5, income = 1_000_000, priceGems = 300),
+        // Уровень "Читер": админки, легендарки и мифы
+        GameBoost(11, "лемон", Res.drawable.boost_11, income = 25_000, priceGems = 10),
+        GameBoost(12, "командный блок", Res.drawable.boost_12, income = 60_000, priceGems = 30),
+        GameBoost(13, "кубок", Res.drawable.boost_13, income = 150_000, priceGems = 75),
+        GameBoost(14, "ничего", Res.drawable.boost_14, income = 400_000, priceGems = 150),
+        GameBoost(15, "херобрин", Res.drawable.boost_15, income = 1_000_000, priceGems = 300),
 
         // --- TIER 4: Легендарные (Монеты + Гемы) ---
-        GameBoost(16, "квантовый пк", Res.drawable.neon_overdrive_roblox_11, income = 3_000_000, priceCoins = 100_000_000, priceGems = 500),
-        GameBoost(17, "бот-администратор", Res.drawable.tigris_roblox_10, income = 8_000_000, priceCoins = 500_000_000, priceGems = 1000),
-        GameBoost(18, "ошибка в матрице", Res.drawable.darkmatter, income = 20_000_000, priceCoins = 1_000_000_000, priceGems = 2000),
-        GameBoost(19, "машина времени", Res.drawable.secret_roblox_7, income = 50_000_000, priceCoins = 10_000_000_000, priceGems = 5000),
-        GameBoost(20, "создатель роблокса", Res.drawable.flex, income = 150_000_000, priceCoins = 100_000_000_000, priceGems = 10000)
+        // Уровень "Бог": создатели игр и абсолютная власть
+        GameBoost(16, "Чиловая белка", Res.drawable.boost_16, income = 3_000_000, priceCoins = 100_000_000, priceGems = 500),
+        GameBoost(17, "Спайк", Res.drawable.boost_17, income = 8_000_000, priceCoins = 500_000_000, priceGems = 1000),
+        GameBoost(18, "алмаз", Res.drawable.boost_18, income = 20_000_000, priceCoins = 1_000_000_000, priceGems = 2000),
+        GameBoost(19, "стив", Res.drawable.boost_19, income = 50_000_000, priceCoins = 10_000_000_000, priceGems = 5000),
+        GameBoost(20, "???", Res.drawable.boost_20, income = 150_000_000, priceCoins = 100_000_000_000, priceGems = 10000)
     )
 }
