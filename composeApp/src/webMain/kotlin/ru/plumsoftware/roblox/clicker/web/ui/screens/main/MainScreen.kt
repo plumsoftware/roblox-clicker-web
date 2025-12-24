@@ -93,10 +93,6 @@ fun MainScreen() {
             ?: Res.drawable.minecraft_forest_background // Дефолт
     }
 
-    val currentAutoIncome = state.gamerData.unlockedBoostIds.sumOf { id ->
-        GameConfig.allBoosts.find { it.id == id }?.income ?: 0
-    }
-
     // Логика поиска картинки выбранного персонажа
     val selectedCharacterResource = remember(state.gamerData.selectedSkinId) {
         state.charactersList.find { it.isSelected }?.resourceName
@@ -343,7 +339,7 @@ fun MainScreen() {
                                 )
 
                                 OutlinedText(
-                                    text = formatCompactNumber(currentAutoIncome),
+                                    text = formatCompactNumber(state.totalIncome),
                                     style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     fillColor = Color.White,
