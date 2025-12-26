@@ -454,7 +454,7 @@ fun MainScreen() {
                         // --- МЕНЮ ---
                         Column(
                             modifier = Modifier
-                                .width(190.dp)
+                                .width(160.dp)
                                 .fillMaxHeight()
                                 .background(Color.Black.copy(alpha = 0.2f))
                                 .padding(top = 20.dp, start = 16.dp, end = 16.dp),
