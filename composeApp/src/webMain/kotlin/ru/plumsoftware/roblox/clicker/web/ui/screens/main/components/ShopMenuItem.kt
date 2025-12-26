@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.plumsoftware.roblox.clicker.web.ui.screens.components.OutlinedText
 
-// Вспомогательный компонент для пункта меню
 @Composable
 fun ShopMenuItem(
     text: String,
@@ -28,7 +27,7 @@ fun ShopMenuItem(
     ) {
         OutlinedText(
             text = text,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             fillColor = Color.White,
             outlineColor = Color.Black,

@@ -61,13 +61,13 @@ fun BoostCard(
                 Column {
                     Text(
                         text = boost.name,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
                     )
                     Text(
                         text = "+${formatCompactNumber(boost.income)} / сек",
-                        style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
+                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont()),
                         color = Color(0xFF00E676)
                     )
                 }
@@ -78,7 +78,7 @@ fun BoostCard(
             // НИЖНЯЯ ЧАСТЬ: Цена (справа) или Статус
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End // Прижимаем к правому краю
+                horizontalArrangement = Arrangement.End
             ) {
                 if (isUnlocked) {
                     Text("куплено", color = Color.Green, fontWeight = FontWeight.Medium)
@@ -90,7 +90,7 @@ fun BoostCard(
                                 text = formatCompactNumber(boost.priceCoins),
                                 color = Color(0xFFFFD600),
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont())
+                                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont())
                             )
                             Image(
                                 painter = painterResource(Res.drawable.coin_icon),
@@ -100,7 +100,7 @@ fun BoostCard(
                         }
 
                         if (boost.priceCoins > 0 && boost.priceGems > 0) {
-                            Spacer(modifier = Modifier.width(12.dp)) // Отступ между ценами
+                            Spacer(modifier = Modifier.width(12.dp))
                         }
 
                         if (boost.priceGems > 0) {
@@ -108,7 +108,7 @@ fun BoostCard(
                                 text = formatCompactNumber(boost.priceGems),
                                 color = Color(0xFF00B0FF),
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont())
+                                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont())
                             )
                             Image(
                                 painter = painterResource(Res.drawable.gem_icon),

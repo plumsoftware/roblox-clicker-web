@@ -37,9 +37,9 @@ fun CharacterItem(
     onClick: () -> Unit
 ) {
     val backgroundColor = when {
-        character.isSelected -> Color(0xFF00E676).copy(alpha = 0.5f) // Зеленый (Выбран)
-        character.isUnlocked -> Color.White.copy(alpha = 0.2f)       // Обычный (Куплен)
-        else -> Color.Black.copy(alpha = 0.3f)                       // Темный (Закрыт)
+        character.isSelected -> Color(0xFF00E676).copy(alpha = 0.5f)
+        character.isUnlocked -> Color.White.copy(alpha = 0.2f)
+        else -> Color.Black.copy(alpha = 0.3f)
     }
 
     val borderColor = if (character.isSelected) Color(0xFF00E676) else Color.Transparent
@@ -79,7 +79,7 @@ fun CharacterItem(
 
                 Text(
                     text = character.name,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
@@ -89,7 +89,7 @@ fun CharacterItem(
 
             Text(
                 text = "+${formatCompactNumber(character.clickPower)} клик",
-                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
+                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont()),
                 color = Color.Green,
                 fontWeight = FontWeight.Medium,
             )
@@ -114,7 +114,6 @@ fun CharacterItem(
                     )
                 }
             } else {
-                // Цена
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
@@ -122,8 +121,8 @@ fun CharacterItem(
                 ) {
                     Text(
                         text = formatCompactNumber(character.price),
-                        style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
-                        color = Color(0xFFFFD600), // Золотой
+                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont()),
+                        color = Color(0xFFFFD600),
                         fontWeight = FontWeight.Medium,
                     )
                     Spacer(modifier = Modifier.width(4.dp))

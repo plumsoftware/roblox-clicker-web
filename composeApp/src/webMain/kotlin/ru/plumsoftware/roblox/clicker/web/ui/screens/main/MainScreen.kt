@@ -117,10 +117,8 @@ fun MainScreen() {
     }
 
     Scaffold {
-        // ФОН ЭКРАНА
         Image(
             modifier = Modifier.fillMaxSize(),
-            // Используем динамический ресурс
             painter = painterResource(currentBackgroundResource),
             contentDescription = null,
             contentScale = ContentScale.FillBounds
@@ -129,7 +127,7 @@ fun MainScreen() {
         Box(modifier = Modifier.fillMaxSize()) {
             Row(modifier = Modifier.fillMaxSize()) {
                 // ---------------------------------------------------------
-                // 1. ЛЕВАЯ ЧАСТЬ (ИГРОВОЕ ПОЛЕ)
+                // 1. ЛЕВАЯ ЧАСТЬ
                 // ---------------------------------------------------------
                 Column(
                     modifier = Modifier
@@ -143,33 +141,31 @@ fun MainScreen() {
                             .fillMaxWidth()
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
-                        // --- ЗВУК --- -
+                        // --- ЗВУК ---
                         Card(
                             modifier = Modifier.align(Alignment.CenterStart),
                             onClick = { viewModel.onToggleMusic() },
                             colors = CardDefaults.cardColors(
-                                // Полупрозрачный черный фон
                                 containerColor = Color.Black.copy(alpha = 0.4f)
                             ),
                             shape = MaterialTheme.shapes.medium,
                             border = BorderStroke(
                                 2.dp,
                                 Color.White.copy(alpha = 0.5f)
-                            ) // Белая обводка для стиля
+                            )
                         ) {
-                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                                OutlinedText(
-                                    // Меняем текст в зависимости от стейта
-                                    text = if (state.gamerData.isMusicOn) "музыка: вкл" else "музыка: выкл",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
-                                        0xFFFF1744
-                                    ), // Зеленый или Красный
-                                    outlineColor = Color.Black,
-                                    strokeWidth = 3f
-                                )
-                            }
+//                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+//                                OutlinedText(
+//                                    text = if (state.gamerData.isMusicOn) "музыка: вкл" else "музыка: выкл",
+//                                    style = MaterialTheme.typography.titleSmall,
+//                                    fontWeight = FontWeight.Bold,
+//                                    fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
+//                                        0xFFFF1744
+//                                    ),
+//                                    outlineColor = Color.Black,
+//                                    strokeWidth = 3f
+//                                )
+//                            }
                         }
 
                         // --- КАРТОЧКА МОНЕТ ---
@@ -194,10 +190,9 @@ fun MainScreen() {
 
                                 Spacer(modifier = Modifier.width(8.dp))
 
-
                                 Text(
                                     text = formatCompactNumber(state.gamerData.coins),
-                                    style = MaterialTheme.typography.displaySmall.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF7D6608),
                                 )
@@ -228,7 +223,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.gems),
-                                    style = MaterialTheme.typography.displaySmall.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0277BD),
                                 )
@@ -294,7 +289,7 @@ fun MainScreen() {
                             ) {
                                 OutlinedText(
                                     text = "клик",
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     fillColor = Color.White,
                                     outlineColor = Color.Black,
@@ -303,7 +298,7 @@ fun MainScreen() {
 
                                 OutlinedText(
                                     text = formatCompactNumber(GameConfig.allCharacters.first { it.id == state.gamerData.selectedSkinId }.clickPower),
-                                    style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     fillColor = Color.White,
                                     outlineColor = Color.Black,
@@ -336,7 +331,7 @@ fun MainScreen() {
                             ) {
                                 OutlinedText(
                                     text = "автоклик",
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     fillColor = Color.White,
                                     outlineColor = Color.Black,
@@ -345,7 +340,7 @@ fun MainScreen() {
 
                                 OutlinedText(
                                     text = formatCompactNumber(state.totalIncome),
-                                    style = MaterialTheme.typography.displayMedium.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     fillColor = Color.White,
                                     outlineColor = Color.Black,
@@ -355,7 +350,7 @@ fun MainScreen() {
                         }
                     }
 
-                    // Тут прогресс бар для накликов для гемов
+                    // Прогресс бар
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -364,16 +359,14 @@ fun MainScreen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        // Считаем прогресс от 0.0 до 1.0
                         val progressValue = if (state.maxClickProgressForGems > 0) {
                             (state.gamerData.clickProgressForGems / state.maxClickProgressForGems).toFloat()
                         } else {
                             0f
                         }
-                        // Анимация для плавности
                         val animatedProgress by animateFloatAsState(
                             targetValue = progressValue,
-                            animationSpec = tween(durationMillis = 100) // Быстрая анимация
+                            animationSpec = tween(durationMillis = 100)
                         )
 
                         LinearProgressIndicator(
@@ -384,19 +377,18 @@ fun MainScreen() {
                                 .weight(1.0f)
                                 .border(1.dp, Color.Black, MaterialTheme.shapes.medium),
                             trackColor = Color(0xFFB3E5FC).copy(alpha = 0.5f),
-                            color = Color(0xFF00B0FF), // Ярко-синий
+                            color = Color(0xFF00B0FF),
                             gapSize = 0.dp,
                             progress = {
                                 if (state.maxClickProgressForGems > 0)
                                     (state.gamerData.clickProgressForGems / state.maxClickProgressForGems).toFloat()
                                 else 0f
-                            } // Используем анимированное значение
+                            }
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
                         val unclaimedCount = state.gamerData.unclaimedGems
-                        // Иконка гема справа (можно сделать кликабельной или анимированной при получении гема)
                         Card(
                             modifier = Modifier,
                             colors = CardDefaults.cardColors(
@@ -411,11 +403,10 @@ fun MainScreen() {
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
-                                // Если есть награда, показываем число
                                 if (unclaimedCount > 0) {
                                     Text(
                                         text = "+$unclaimedCount",
-                                        style = MaterialTheme.typography.displaySmall.copy(
+                                        style = MaterialTheme.typography.headlineSmall.copy(
                                             fontFamily = getNumericFont()
                                         ),
                                         fontWeight = FontWeight.Bold,
@@ -449,11 +440,11 @@ fun MainScreen() {
                     OutlinedText(
                         modifier = Modifier.padding(vertical = 24.dp),
                         text = "магазин",
-                        style = MaterialTheme.typography.displayMedium,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Black,
                         fillColor = Color.White,
                         outlineColor = Color.Black,
-                        strokeWidth = 6f // Заголовок жирнее
+                        strokeWidth = 6f
                     )
 
                     Row(
@@ -476,16 +467,12 @@ fun MainScreen() {
                             ShopMenuItem(text = "бусты") {
                                 viewModel.onEvent(MainScreenPack.Event.onBoostClick())
                             }
-//                            ShopMenuItem(text = "звуки") {
-//                                viewModel.onEvent(MainScreenPack.Event.onSoundsClick())
-//                            }
                             ShopMenuItem(text = "фоны") {
                                 viewModel.onEvent(MainScreenPack.Event.onBackClick())
                             }
                         }
 
                         // --- КОНТЕНТ ---
-                        // СПИСОК ТОВАРОВ
                         Column(
                             modifier = Modifier
                                 .weight(1f)
@@ -506,7 +493,6 @@ fun MainScreen() {
                                         )
                                     }
                                 }
-                                // Вкладка ФОНОВ (BackShop)
                                 else if (state.currentScreen is MainScreenScreens.Shop.BackShop) {
                                     items(state.backgroundsList) { background ->
                                         BackgroundCard(
@@ -518,7 +504,6 @@ fun MainScreen() {
                                     items(GameConfig.allBoosts) { boost ->
                                         BoostCard(
                                             boost = boost,
-                                            // Проверяем, куплен ли
                                             isUnlocked = state.gamerData.unlockedBoostIds.contains(
                                                 boost.id
                                             ),
@@ -526,7 +511,6 @@ fun MainScreen() {
                                         )
                                     }
                                 } else {
-                                    // Заглушка для других вкладок
                                     item {
                                         Text("Этот раздел в разработке...", color = Color.Gray)
                                     }
@@ -537,12 +521,11 @@ fun MainScreen() {
                 }
             }
 
-            // --- ДИАЛОГОВОЕ ОКНО (ПОВЕРХ ВСЕГО) ---
+            // --- ДИАЛОГОВОЕ ОКНО ---
             if (state.currentMainScreenDialog is MainScreenDialog.MainDialog.ClaimGemsDialog) {
                 val gemsAmount =
                     (state.currentMainScreenDialog as MainScreenDialog.MainDialog.ClaimGemsDialog).amount
 
-                // Затемнение фона
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -563,9 +546,9 @@ fun MainScreen() {
                         ) {
                             OutlinedText(
                                 text = "награда!",
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Black,
-                                fillColor = Color(0xFFFFD600), // Золотой
+                                fillColor = Color(0xFFFFD600),
                                 outlineColor = Color.Black
                             )
 
@@ -577,9 +560,9 @@ fun MainScreen() {
 
                             OutlinedText(
                                 text = "+$gemsAmount ГЕМОВ",
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                fillColor = Color(0xFF0277BD), // Синий
+                                fillColor = Color(0xFF0277BD),
                                 outlineColor = Color.Black
                             )
 
@@ -598,7 +581,7 @@ fun MainScreen() {
                                     text = "забрать",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = MaterialTheme.typography.titleSmall
                                 )
                             }
                         }

@@ -79,7 +79,7 @@ fun BackgroundCard(
 
                 Text(
                     text = background.name,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
@@ -99,7 +99,7 @@ fun BackgroundCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = formatCompactNumber(background.price),
-                        style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
+                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont()),
                         color = Color(0xFF00B0FF),
                         fontWeight = FontWeight.Medium,
                     )
