@@ -21,6 +21,10 @@ external fun savePlayerData(json: String): Promise<JsAny?>
 @OptIn(ExperimentalWasmJsInterop::class)
 external fun loadPlayerData(): Promise<JsAny?>
 
+external fun gameReady()
+
+external fun getLang(): String
+
 actual object YandexGamesManager {
     actual var isInitialized: Boolean = false
         private set
@@ -95,6 +99,22 @@ actual object YandexGamesManager {
         } catch (e: Throwable) {
             println("[Wasm Target] ❌ ОШИБКА: $e")
             null
+        }
+    }
+
+    actual fun gameReady() {
+        try {
+            gameReady() // Вызов JS функции
+        } catch (e: Throwable) {
+            println("Game Ready Error")
+        }
+    }
+
+    actual fun getLanguage(): String {
+        return try {
+            getLang()
+        } catch (e: Throwable) {
+            "ru"
         }
     }
 }

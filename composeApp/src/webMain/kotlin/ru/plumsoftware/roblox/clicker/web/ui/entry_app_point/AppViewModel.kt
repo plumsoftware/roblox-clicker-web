@@ -44,6 +44,11 @@ class AppViewModel : ViewModel() {
             // 1. Инициализируем SDK
             YandexGamesManager.init()
 
+            // ПОЛУЧАЕМ ЯЗЫК ИЗ SDK
+            if (YandexGamesManager.isInitialized) {
+                val lang = YandexGamesManager.getLanguage()
+            }
+
             // 2. Как только закончили (неважно успешно или нет), пускаем в игру
             if (YandexGamesManager.isInitialized) {
                 println("AppViewModel: SDK Success!")

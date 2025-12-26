@@ -102,3 +102,29 @@ function loadPlayerData() {
             return "";
         });
 }
+
+function gameReady() {
+    if (window.ysdk && window.ysdk.features && window.ysdk.features.LoadingAPI) {
+        console.log("[JS Bridge] Отправляем Game Ready...");
+        window.ysdk.features.LoadingAPI.ready();
+    } else {
+        console.warn("[JS Bridge] Game Ready API недоступен (возможно, SDK не инициализирован).");
+    }
+}
+
+// --- Исправление "Системного плеера" ---
+if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', function() {});
+    navigator.mediaSession.setActionHandler('pause', function() {});
+    navigator.mediaSession.setActionHandler('seekbackward', null);
+    navigator.mediaSession.setActionHandler('seekforward', null);
+    navigator.mediaSession.setActionHandler('previoustrack', null);
+    navigator.mediaSession.setActionHandler('nexttrack', null);
+}
+
+function getLang() {
+    if (window.ysdk && window.ysdk.environment && window.ysdk.environment.i18n) {
+        return window.ysdk.environment.i18n.lang;
+    }
+    return "ru"; // Дефолт
+}

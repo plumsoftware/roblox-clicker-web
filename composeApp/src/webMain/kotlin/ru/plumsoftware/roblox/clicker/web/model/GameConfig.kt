@@ -63,8 +63,8 @@ object GameConfig {
         ),
         GameCharacter(
             id = 7,
-            name = "Человек-Тапок",
-            resourceName = Res.drawable.spider,
+            name = "Душнила",
+            resourceName = Res.drawable.dushnila,
             clickPower = 40,
             price = 45_000, // Было 15,000
             isSelected = false,
@@ -280,16 +280,16 @@ object GameConfig {
         // --- TIER 2: Средние (Дорогие монеты) ---
         // Уровень "Продвинутый": трейды, мобы и донат
         GameBoost(6, "пудж", Res.drawable.boost_6, income = 250, priceCoins = 50_000),
-        GameBoost(7, "житель", Res.drawable.boost_7, income = 600, priceCoins = 150_000),
+        GameBoost(7, "житель", Res.drawable.boost_7_v2, income = 600, priceCoins = 150_000),
         GameBoost(8, "эль примо с ультой", Res.drawable.boost_8, income = 1_500, priceCoins = 500_000),
         GameBoost(9, "спавнер мобов", Res.drawable.boost_9, income = 4_000, priceCoins = 1_500_000),
-        GameBoost(10, "голем", Res.drawable.boost_10, income = 10_000, priceCoins = 5_000_000),
+        GameBoost(10, "голем", Res.drawable.boost_10_v2, income = 10_000, priceCoins = 3_000_000),
 
         // --- TIER 3: Мощные (За Гемы) ---
         // Уровень "Читер": админки, легендарки и мифы
-        GameBoost(11, "лемон", Res.drawable.boost_11, income = 25_000, priceGems = 10),
-        GameBoost(12, "командный блок", Res.drawable.boost_12, income = 60_000, priceGems = 30),
-        GameBoost(13, "кубок", Res.drawable.boost_13, income = 150_000, priceGems = 75),
+        GameBoost(11, "лемон", Res.drawable.boost_11, income = 25_000, priceGems = 50),
+        GameBoost(12, "командный блок", Res.drawable.boost_12, income = 60_000, priceGems = 75),
+        GameBoost(13, "кубок", Res.drawable.boost_13, income = 150_000, priceGems = 100),
         GameBoost(14, "ничего", Res.drawable.boost_14, income = 400_000, priceGems = 150),
         GameBoost(15, "херобрин", Res.drawable.boost_15, income = 1_000_000, priceGems = 300),
 

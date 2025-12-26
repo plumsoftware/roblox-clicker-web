@@ -82,6 +82,7 @@ import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainSc
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts.getNumericFont
 import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
+import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
 
 @Composable
 fun MainScreen() {
@@ -109,6 +110,10 @@ fun MainScreen() {
                 MainScreenPack.Effect.onSoundsClicked -> {}
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        YandexGamesManager.gameReady()
     }
 
     Scaffold {

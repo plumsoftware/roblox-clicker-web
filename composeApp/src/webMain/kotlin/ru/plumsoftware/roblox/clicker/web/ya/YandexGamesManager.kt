@@ -13,4 +13,6 @@ expect object YandexGamesManager {
     // Теперь принимаем и возвращаем целый объект
     suspend fun saveGame(data: GamerData)
     suspend fun loadGame(): GamerData?
+    fun gameReady()
+    fun getLanguage(): String
 }

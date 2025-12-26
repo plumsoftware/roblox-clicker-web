@@ -12,6 +12,8 @@ import ru.plumsoftware.roblox.clicker.web.model.GamerData
 external fun initYandexSdk(): Promise<Boolean>
 external fun savePlayerData(json: String): Promise<Boolean>
 external fun loadPlayerData(): Promise<String>
+external fun gameReady()
+external fun getLang(): String
 
 actual object YandexGamesManager {
     actual var isInitialized: Boolean = false
@@ -88,6 +90,22 @@ actual object YandexGamesManager {
         } catch (e: dynamic) {
             console.error("[JS Target] ❌ loadGame() -> ОШИБКА:", e)
             null
+        }
+    }
+
+    actual fun gameReady() {
+        try {
+            gameReady() // Вызов JS функции
+        } catch (e: Throwable) {
+            console.error("Game Ready Error", e)
+        }
+    }
+
+    actual fun getLanguage(): String {
+        return try {
+            getLang()
+        } catch (e: Throwable) {
+            "ru"
         }
     }
 }
