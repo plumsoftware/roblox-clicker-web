@@ -24,6 +24,8 @@ function initYandexSdk() {
             console.log("[JS Bridge] SDK инициализирован!");
             window.ysdk = sdk;
 
+            window.ysdk.features.LoadingAPI.ready();
+
             // Инициализация Игрока (нужна для сохранений)
             // scopes: false - не требуем авторизации сразу
             return sdk.getPlayer({ scopes: false });
