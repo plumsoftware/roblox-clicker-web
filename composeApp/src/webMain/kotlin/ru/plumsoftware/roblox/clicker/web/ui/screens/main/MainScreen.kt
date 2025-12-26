@@ -83,6 +83,11 @@ import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainSc
 import ru.plumsoftware.roblox.clicker.web.ui.theme.Fonts.getNumericFont
 import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.text.rememberTextMeasurer
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.ClickEffectsCanvas
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.rememberClickEffectsState
 
 @Composable
 fun MainScreen() {
@@ -99,6 +104,10 @@ fun MainScreen() {
         state.charactersList.find { it.isSelected }?.resourceName
             ?: Res.drawable.homeless // Дефолт, если что-то пошло не так
     }
+
+    val clickEffectsState = rememberClickEffectsState()
+    val textMeasurer = rememberTextMeasurer()
+    val coinPainter = painterResource(Res.drawable.coin_icon) // Твоя монетка
 
     LaunchedEffect(key1 = Unit) {
         viewModel.effects.collect { effect ->
@@ -231,32 +240,63 @@ fun MainScreen() {
                         }
                     }
 
-                    // Персонаж
-                    val characterInteractionSource = remember { MutableInteractionSource() }
-                    val isPressed by characterInteractionSource.collectIsPressedAsState()
-
-                    val scale by animateFloatAsState(
-                        targetValue = if (isPressed) 0.9f else 1.0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMedium
-                        )
-                    )
-
-                    Image(
-                        painter = painterResource(selectedCharacterResource),
-                        contentDescription = null,
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1.0f)
-                            .scale(scale)
-                            .clickable(
-                                interactionSource = characterInteractionSource,
-                                indication = null,
-                                onClick = {
-                                    viewModel.onMainCharacterClick()
+                            .fillMaxWidth() // Важно занять ширину, чтобы клики ловились везде вокруг героя
+                    ) {
+                        // Анимация нажатия (Scale)
+                        val characterInteractionSource = remember { MutableInteractionSource() }
+                        val isPressed by characterInteractionSource.collectIsPressedAsState()
+                        val scale by animateFloatAsState(
+                            targetValue = if (isPressed) 0.9f else 1.0f,
+                            animationSpec = spring(dampingRatio = 0.5f, stiffness = 500f)
+                        )
+
+                        Image(
+                            painter = painterResource(selectedCharacterResource),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .scale(scale)
+                                // УБИРАЕМ clickable ЗДЕСЬ, переносим его на Box или используем detectTapGestures ниже
+                                // Но чтобы работала анимация нажатия (interactionSource),
+                                // нам нужен способ передать press события.
+                                // Самый простой способ получить координаты клика:
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onPress = { offset ->
+                                            val press = androidx.compose.foundation.interaction.PressInteraction.Press(offset)
+                                            characterInteractionSource.emit(press)
+                                            tryAwaitRelease()
+                                            characterInteractionSource.emit(androidx.compose.foundation.interaction.PressInteraction.Release(press))
+                                        },
+                                        onTap = { offset ->
+                                            // 1. Логика игры
+                                            viewModel.onMainCharacterClick()
+
+                                            // 2. Запускаем эффект в точке клика
+                                            // Получаем силу клика для отображения
+                                            val clickPower = GameConfig.allCharacters.find {
+                                                it.id == state.gamerData.selectedSkinId
+                                            }?.clickPower ?: 1
+
+                                            clickEffectsState.addExplosion(
+                                                position = offset, // Координаты клика относительно картинки
+                                                amountText = formatCompactNumber(clickPower)
+                                            )
+                                        }
+                                    )
                                 }
-                            )
-                    )
+                        )
+
+                        ClickEffectsCanvas(
+                            state = clickEffectsState,
+                            coinPainter = coinPainter,
+                            textMeasurer = textMeasurer,
+                            modifier = Modifier.size(200.dp).align(Alignment.Center)
+                        )
+                    }
 
                     Row(
                         modifier = Modifier
