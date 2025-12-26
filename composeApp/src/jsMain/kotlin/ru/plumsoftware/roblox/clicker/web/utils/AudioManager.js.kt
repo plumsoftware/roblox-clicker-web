@@ -4,124 +4,161 @@ package ru.plumsoftware.roblox.clicker.web.utils
 
 import kotlinx.browser.document
 import org.w3c.dom.Audio
+import kotlinx.browser.window
 
 actual object AudioManager {
 
-    private var backgroundMusic: Audio? = null
+    // --- WEB AUDIO API (Для музыки) ---
+    private var audioContext: dynamic = null
+    private var musicSource: dynamic = null
+    private var musicGainNode: dynamic = null // Для громкости
+    private var currentMusicUrl: String? = null
 
-    // Флаг: играла ли музыка до сворачивания вкладки
+    // --- HTML AUDIO (Для звуков) ---
+    // Для кликов оставляем старый способ, это ок
+
     private var wasPlayingBeforeHide: Boolean = false
 
-    // По умолчанию true, но ViewModel должна обновить это при загрузке профиля
     actual var isSoundEnabled: Boolean = true
     actual var isMusicEnabled: Boolean = true
 
     init {
-        // Подписываемся на сворачивание вкладки
+        // Инициализируем AudioContext
+        // Делаем это лениво или при первом клике, так как браузеры требуют жеста
+        try {
+            val ctxConstructor = js("window.AudioContext || window.webkitAudioContext")
+            audioContext = js("new ctxConstructor()")
+        } catch (e: dynamic) {
+            console.error("[AudioManager] Web Audio API not supported", e)
+        }
+
+        // Слушаем сворачивание
         document.addEventListener("visibilitychange", {
             handleVisibilityChange()
         })
-        console.log("[Audio] Manager initialized")
     }
 
     private fun handleVisibilityChange() {
         val isHidden = document.asDynamic().hidden.unsafeCast<Boolean>()
 
         if (isHidden) {
-            // Вкладку свернули -> Пауза
-            if (backgroundMusic != null && backgroundMusic?.paused == false) {
-                backgroundMusic?.pause()
+            // --- ВКЛАДКА СВЕРНУТА ---
+            if (audioContext != null && audioContext.state == "running") {
+                // Приостанавливаем весь контекст (музыку)
+                audioContext.suspend()
                 wasPlayingBeforeHide = true
-                console.log("[Audio] Auto-paused (Tab hidden)")
+                console.log("[AudioManager] Context suspended (Tab hidden)")
             } else {
                 wasPlayingBeforeHide = false
             }
         } else {
-            // Вкладку открыли -> Возобновляем
-            if (wasPlayingBeforeHide && isMusicEnabled && backgroundMusic != null) {
-                val promise = backgroundMusic?.play()
-                promise?.catch { e -> console.warn("[Audio] Resume blocked:", e) }
+            // --- ВКЛАДКА РАЗВЕРНУТА ---
+            if (wasPlayingBeforeHide && isMusicEnabled) {
+                // Возобновляем
+                audioContext?.resume()
                 wasPlayingBeforeHide = false
-                console.log("[Audio] Auto-resumed (Tab visible)")
+                console.log("[AudioManager] Context resumed (Tab visible)")
             }
         }
     }
 
     actual fun playSound(fileName: String, volume: Double) {
-        if (!isSoundEnabled) {
-            // console.log("[Audio] Skip sound (Disabled setting)")
-            return
-        }
+        if (!isSoundEnabled) return
+        val isHidden = document.asDynamic().hidden.unsafeCast<Boolean>()
+        if (isHidden) return
 
         try {
-            // Создаем новый объект на каждый клик для наложения звуков
+            // Для коротких звуков оставляем new Audio(), это не вызывает плеер
             val audio = Audio("sounds/$fileName")
             audio.volume = volume
             val promise = audio.play()
-            promise.catch { e ->
-                // Ошибки клика можно не логировать громко, чтобы не спамить
-            }
+            promise.catch { }
         } catch (e: dynamic) {
-            console.error("[Audio] SFX Error:", e)
+            console.error("SFX error:", e)
         }
     }
 
     actual fun playMusic(fileName: String, volume: Double) {
-        // Даже если isMusicEnabled == false, мы сохраняем объект, но не играем,
-        // или просто выходим. Лучше выходить.
-        if (!isMusicEnabled) {
-            console.log("[Audio] PlayMusic skipped (Music Disabled)")
+        if (!isMusicEnabled) return
+        if (audioContext == null) return
+
+        // Если уже играет этот трек — просто убеждаемся, что контекст работает
+        if (currentMusicUrl == fileName && musicSource != null) {
+            if (audioContext.state == "suspended") {
+                audioContext.resume()
+            }
             return
         }
 
-        try {
-            // Если уже играет ЭТОТ ЖЕ трек
-            if (backgroundMusic?.src?.contains(fileName) == true) {
-                if (backgroundMusic?.paused == true) {
-                    console.log("[Audio] Resuming existing track")
-                    backgroundMusic?.play()
-                }
-                return
+        stopMusic() // Останавливаем текущий
+
+        currentMusicUrl = fileName
+        val path = "sounds/$fileName"
+
+        // Загружаем файл через fetch и декодируем
+        window.fetch(path).then { response ->
+            response.arrayBuffer().then { buffer ->
+                audioContext.decodeAudioData(buffer, { decodedData ->
+                    playDecodedMusic(decodedData, volume)
+                }, { e ->
+                    console.error("[AudioManager] Decode error:", e)
+                })
             }
+        }.catch { e ->
+            console.error("[AudioManager] Fetch error:", e)
+        }
+    }
 
-            stopMusic() // Останавливаем старый
+    private fun playDecodedMusic(buffer: dynamic, volume: Double) {
+        try {
+            // 1. Создаем источник
+            musicSource = audioContext.createBufferSource()
+            musicSource.buffer = buffer
+            musicSource.loop = true // Зацикливаем
 
-            console.log("[Audio] Starting new track: $fileName")
-            val audio = Audio("sounds/$fileName")
-            audio.volume = volume
-            audio.loop = true
+            // 2. Создаем узел громкости
+            musicGainNode = audioContext.createGain()
+            musicGainNode.gain.value = volume
 
-            backgroundMusic = audio
+            // 3. Соединяем: Source -> Gain -> Destination (динамики)
+            musicSource.connect(musicGainNode)
+            musicGainNode.connect(audioContext.destination)
 
-            val promise = audio.play()
-            promise.then {
-                console.log("[Audio] Music started successfully")
-            }.catch { e ->
-                console.warn("[Audio] Autoplay blocked or file not found:", e)
+            // 4. Запускаем
+            musicSource.start(0)
+            console.log("[AudioManager] Web Audio Music Started")
+
+            // Если контекст был на паузе (браузер заблокировал автоплей), пробуем возобновить
+            if (audioContext.state == "suspended") {
+                audioContext.resume()
             }
 
         } catch (e: dynamic) {
-            console.error("[Audio] Music Error:", e)
+            console.error("[AudioManager] Play decoded error:", e)
         }
     }
 
     actual fun stopMusic() {
-        if (backgroundMusic != null) {
-            console.log("[Audio] Stopping music")
-            backgroundMusic?.pause()
-            backgroundMusic = null
+        try {
+            if (musicSource != null) {
+                musicSource.stop()
+                musicSource.disconnect()
+                musicSource = null
+            }
+            currentMusicUrl = null
+        } catch (e: dynamic) {
+            console.warn("Stop error", e)
         }
-        wasPlayingBeforeHide = false
     }
 
-    // Методы ручного управления (если понадобятся)
     actual fun pauseMusic() {
-        backgroundMusic?.pause()
+        // При ручной паузе (не сворачивание) просто саспендим контекст
+        audioContext?.suspend()
     }
 
     actual fun resumeMusic() {
-        if (isMusicEnabled && backgroundMusic != null) {
-            backgroundMusic?.play()
+        if (isMusicEnabled) {
+            audioContext?.resume()
         }
     }
 }

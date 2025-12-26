@@ -154,18 +154,18 @@ fun MainScreen() {
                                 Color.White.copy(alpha = 0.5f)
                             )
                         ) {
-//                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-//                                OutlinedText(
-//                                    text = if (state.gamerData.isMusicOn) "музыка: вкл" else "музыка: выкл",
-//                                    style = MaterialTheme.typography.titleSmall,
-//                                    fontWeight = FontWeight.Bold,
-//                                    fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
-//                                        0xFFFF1744
-//                                    ),
-//                                    outlineColor = Color.Black,
-//                                    strokeWidth = 3f
-//                                )
-//                            }
+                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                                OutlinedText(
+                                    text = if (state.gamerData.isMusicOn) "звук: вкл" else "звук: выкл",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
+                                        0xFFFF1744
+                                    ),
+                                    outlineColor = Color.Black,
+                                    strokeWidth = 3f
+                                )
+                            }
                         }
 
                         // --- КАРТОЧКА МОНЕТ ---

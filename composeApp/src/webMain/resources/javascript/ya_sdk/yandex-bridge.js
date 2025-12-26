@@ -112,6 +112,13 @@ function gameReady() {
     }
 }
 
+function getLang() {
+    if (window.ysdk && window.ysdk.environment && window.ysdk.environment.i18n) {
+        return window.ysdk.environment.i18n.lang;
+    }
+    return "ru"; // Дефолт
+}
+
 // --- Исправление "Системного плеера" ---
 if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', function() {});
@@ -120,11 +127,4 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('seekforward', null);
     navigator.mediaSession.setActionHandler('previoustrack', null);
     navigator.mediaSession.setActionHandler('nexttrack', null);
-}
-
-function getLang() {
-    if (window.ysdk && window.ysdk.environment && window.ysdk.environment.i18n) {
-        return window.ysdk.environment.i18n.lang;
-    }
-    return "ru"; // Дефолт
 }

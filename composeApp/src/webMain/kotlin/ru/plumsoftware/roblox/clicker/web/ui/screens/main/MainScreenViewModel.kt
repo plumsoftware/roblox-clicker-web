@@ -281,7 +281,7 @@ class MainScreenViewModel : ViewModel() {
             if (state.value.gamerData.isMusicOn) {
                 // ИСПОЛЬЗУЕМ playMusic, А НЕ playSound!
                 // Убедись, что файл Sakura-Girl-Cat-Walk-chosic.com_.mp3 лежит в src/jsMain/resources/sounds/
-//                AudioManager.playMusic("Sakura-Girl-Cat-Walk-chosic.com_.mp3", volume = 0.3)
+                AudioManager.playMusic("Sakura-Girl-Cat-Walk-chosic.com_.mp3", volume = 0.3)
             }
         }
 
