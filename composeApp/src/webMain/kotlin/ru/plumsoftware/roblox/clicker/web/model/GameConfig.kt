@@ -7,8 +7,8 @@ object GameConfig {
         // --- УРОВЕНЬ 1: НАЧАЛО ---
         GameCharacter(
             id = 1,
-            name = "Боевой Бомжик",
-            resourceName = Res.drawable.homeless,
+            name = "Боевой нобук",
+            resourceName = Res.drawable.nubic,
             clickPower = 1,
             price = 0,
             isSelected = true,
@@ -83,7 +83,7 @@ object GameConfig {
         ),
         GameCharacter(
             id = 9,
-            name = "Ниндзя на перекуре",
+            name = "Ниндзя на пенсии",
             resourceName = Res.drawable.ninja_smoking,
             clickPower = 100,
             price = 150_000, // Было 50,000
@@ -271,34 +271,34 @@ object GameConfig {
     val allBoosts = listOf(
         // --- TIER 1: Слабые (За монеты) ---
         // Начальный уровень: школьники, нубы и дерево
-        GameBoost(1, "нубик с телефоном", Res.drawable.boost_1, income = 1, priceCoins = 100),
-        GameBoost(2, "деревянная кирка", Res.drawable.boost_2, income = 5, priceCoins = 500),
-        GameBoost(3, "кусты из бравла", Res.drawable.boost_3, income = 15, priceCoins = 1_500),
-        GameBoost(4, "Жора", Res.drawable.boost_4, income = 40, priceCoins = 5_000),
-        GameBoost(5, "бесплатные робуксы", Res.drawable.boost_5, income = 100, priceCoins = 15_000),
+        GameBoost(1, "нубик-питомец", Res.drawable.boost_1, income = 1, priceCoins = 100),
+        GameBoost(2, "деревянная кирка", Res.drawable.boost_2, income = 5, priceCoins = 500, priceGems = 1),
+        GameBoost(3, "кусты из бравла", Res.drawable.boost_3, income = 15, priceCoins = 1_500, priceGems = 5),
+        GameBoost(4, "Жора", Res.drawable.boost_4, income = 40, priceCoins = 5_000, priceGems = 7),
+        GameBoost(5, "бесплатные робуксы", Res.drawable.boost_5_v2, income = 100, priceCoins = 15_000, priceGems = 10),
 
         // --- TIER 2: Средние (Дорогие монеты) ---
         // Уровень "Продвинутый": трейды, мобы и донат
-        GameBoost(6, "пудж", Res.drawable.boost_6, income = 250, priceCoins = 50_000),
-        GameBoost(7, "житель", Res.drawable.boost_7_v2, income = 600, priceCoins = 150_000),
-        GameBoost(8, "эль примо с ультой", Res.drawable.boost_8, income = 1_500, priceCoins = 500_000),
-        GameBoost(9, "спавнер мобов", Res.drawable.boost_9, income = 4_000, priceCoins = 1_500_000),
-        GameBoost(10, "голем", Res.drawable.boost_10_v2, income = 10_000, priceCoins = 3_000_000),
+        GameBoost(6, "пудж", Res.drawable.boost_6, income = 250, priceCoins = 50_000, priceGems = 10),
+        GameBoost(7, "житель", Res.drawable.boost_7_v2, income = 600, priceCoins = 150_000, priceGems = 15),
+        GameBoost(8, "эль примо с ультой", Res.drawable.boost_8, income = 1_500, priceCoins = 500_000, priceGems = 20),
+        GameBoost(9, "спавнер мобов", Res.drawable.boost_9, income = 4_000, priceCoins = 1_500_000, priceGems = 25),
+        GameBoost(10, "голем", Res.drawable.boost_10_v2, income = 10_000, priceCoins = 3_000_000, priceGems = 30),
 
         // --- TIER 3: Мощные (За Гемы) ---
         // Уровень "Читер": админки, легендарки и мифы
-        GameBoost(11, "лемон", Res.drawable.boost_11, income = 25_000, priceGems = 50),
-        GameBoost(12, "командный блок", Res.drawable.boost_12, income = 60_000, priceGems = 75),
+        GameBoost(11, "лемон", Res.drawable.boost_11_v2, income = 25_000, priceGems = 50),
+        GameBoost(12, "командный блок", Res.drawable.boost_12_v2, income = 60_000, priceGems = 75),
         GameBoost(13, "кубок", Res.drawable.boost_13, income = 150_000, priceGems = 100),
         GameBoost(14, "ничего", Res.drawable.boost_14, income = 400_000, priceGems = 150),
-        GameBoost(15, "херобрин", Res.drawable.boost_15, income = 1_000_000, priceGems = 300),
+        GameBoost(15, "херобрин", Res.drawable.boost_15_v2, income = 1_000_000, priceGems = 300),
 
         // --- TIER 4: Легендарные (Монеты + Гемы) ---
         // Уровень "Бог": создатели игр и абсолютная власть
-        GameBoost(16, "Чиловая белка", Res.drawable.boost_16, income = 3_000_000, priceCoins = 100_000_000, priceGems = 500),
-        GameBoost(17, "Спайк", Res.drawable.boost_17, income = 8_000_000, priceCoins = 500_000_000, priceGems = 1000),
-        GameBoost(18, "алмаз", Res.drawable.boost_18, income = 20_000_000, priceCoins = 1_000_000_000, priceGems = 2000),
-        GameBoost(19, "стив", Res.drawable.boost_19, income = 50_000_000, priceCoins = 10_000_000_000, priceGems = 5000),
+        GameBoost(16, "чиловая белка", Res.drawable.boost_16, income = 3_000_000, priceCoins = 100_000_000, priceGems = 500),
+        GameBoost(17, "спайк", Res.drawable.boost_17, income = 8_000_000, priceCoins = 500_000_000, priceGems = 1000),
+        GameBoost(18, "легендарный алмаз", Res.drawable.boost_18_v2, income = 20_000_000, priceCoins = 1_000_000_000, priceGems = 2000),
+        GameBoost(19, "рубин", Res.drawable.boost_19_v2, income = 50_000_000, priceCoins = 10_000_000_000, priceGems = 5000),
         GameBoost(20, "???", Res.drawable.boost_20, income = 150_000_000, priceCoins = 100_000_000_000, priceGems = 10000)
     )
 }
