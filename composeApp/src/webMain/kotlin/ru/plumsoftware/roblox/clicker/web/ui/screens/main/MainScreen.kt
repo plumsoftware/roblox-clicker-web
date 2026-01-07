@@ -1,7 +1,12 @@
 package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -85,8 +90,11 @@ import ru.plumsoftware.roblox.clicker.web.utils.formatCompactNumber
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.rememberTextMeasurer
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.ClickEffectsCanvas
+import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.QuestItem
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.components.rememberClickEffectsState
 
 @Composable
@@ -105,9 +113,34 @@ fun MainScreen() {
             ?: Res.drawable.homeless // Дефолт, если что-то пошло не так
     }
 
+    // --- ЛОГИКА ПИТОМЦА ---
+    // Ищем самый крутой купленный буст (с максимальным ID)
+    val currentPet = remember(state.gamerData.unlockedBoostIds) {
+        val maxId = state.gamerData.unlockedBoostIds.maxOrNull()
+        if (maxId != null) {
+            GameConfig.allBoosts.find { it.id == maxId }
+        } else null
+    }
+
+    // Анимация парения питомца (вверх-вниз)
+    val infiniteTransition = rememberInfiniteTransition()
+    val petOffsetY by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -20f, // Амплитуда движения
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing), // Плавность
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
     val clickEffectsState = rememberClickEffectsState()
     val textMeasurer = rememberTextMeasurer()
     val coinPainter = painterResource(Res.drawable.coin_icon) // Твоя монетка
+
+    // ЛОГИКА ИНДИКАТОРА: Проверяем, есть ли выполненные, но не забранные задания
+    val hasClaimableQuests = remember(state.gamerData.activeQuests) {
+        state.gamerData.activeQuests.any { it.current >= it.target && !it.isClaimed }
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.effects.collect { effect ->
@@ -150,30 +183,99 @@ fun MainScreen() {
                             .fillMaxWidth()
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
-                        // --- ЗВУК ---
-                        Card(
-                            modifier = Modifier.align(Alignment.CenterStart),
-                            onClick = { viewModel.onToggleMusic() },
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Black.copy(alpha = 0.4f)
-                            ),
-                            shape = MaterialTheme.shapes.medium,
-                            border = BorderStroke(
-                                2.dp,
-                                Color.White.copy(alpha = 0.5f)
-                            )
+                        Column(
+                            modifier = Modifier.align(Alignment.CenterStart)
                         ) {
-                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                                OutlinedText(
-                                    text = if (state.gamerData.isMusicOn) "звук: вкл" else "звук: выкл",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
-                                        0xFFFF1744
+                            // --- Кнопка ЗАДАНИЯ (С ИНДИКАТОРОМ) ---
+                            // Оборачиваем Card в Box, чтобы поверх нарисовать индикатор
+                            Box {
+                                Card(
+                                    onClick = { viewModel.onEvent(MainScreenPack.Event.onQuestsClick) },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(
+                                            0xFFFFD600
+                                        )
                                     ),
-                                    outlineColor = Color.Black,
-                                    strokeWidth = 3f
-                                )
+                                    shape = MaterialTheme.shapes.medium,
+                                    border = BorderStroke(2.dp, Color.Black)
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(
+                                            horizontal = 20.dp,
+                                            vertical = 12.dp
+                                        )
+                                    ) {
+                                        OutlinedText(
+                                            text = "задания",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            fillColor = Color.White,
+                                            outlineColor = Color.Black,
+                                            strokeWidth = 3f
+                                        )
+                                    }
+                                }
+
+                                // КРАСНЫЙ ИНДИКАТОР
+                                if (hasClaimableQuests) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(20.dp) // Размер точки
+                                            .align(Alignment.TopEnd) // Правый верхний угол
+                                            .offset(
+                                                x = 6.dp,
+                                                y = (-6).dp
+                                            ) // Чуть вылезаем за границы кнопки
+                                            .clip(CircleShape)
+                                            .background(Color.Red)
+                                            .border(
+                                                2.dp,
+                                                Color.White,
+                                                CircleShape
+                                            ), // Белая обводка для контраста
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        // Можно добавить восклицательный знак внутри, если хочешь
+                                        Text(
+                                            text = "!",
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // --- ЗВУК ---
+                            Card(
+                                onClick = { viewModel.onToggleMusic() },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.Black.copy(
+                                        alpha = 0.4f
+                                    )
+                                ),
+                                shape = MaterialTheme.shapes.medium,
+                                border = BorderStroke(2.dp, Color.White.copy(alpha = 0.5f))
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(
+                                        horizontal = 20.dp,
+                                        vertical = 12.dp
+                                    )
+                                ) {
+                                    OutlinedText(
+                                        text = if (state.gamerData.isMusicOn) "звук: вкл" else "звук: выкл",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
+                                            0xFFFF1744
+                                        ),
+                                        outlineColor = Color.Black,
+                                        strokeWidth = 3f
+                                    )
+                                }
                             }
                         }
 
@@ -201,7 +303,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.coins),
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineLarge.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF7D6608),
                                 )
@@ -232,7 +334,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.gems),
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineLarge.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0277BD),
                                 )
@@ -254,6 +356,20 @@ fun MainScreen() {
                             animationSpec = spring(dampingRatio = 0.5f, stiffness = 500f)
                         )
 
+                        // 1. ПИТОМЕЦ (БУСТ)
+                        if (currentPet != null) {
+                            Image(
+                                painter = painterResource(currentPet.resourceName),
+                                contentDescription = null,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .size(140.dp) // Размер питомца
+                                    .align(Alignment.BottomStart) // Слева снизу (внутри Box)
+                                    .padding(start = 20.dp, bottom = 20.dp) // Отступы от края
+                                    .offset(y = petOffsetY.dp) // Анимация парения
+                            )
+                        }
+
                         Image(
                             painter = painterResource(selectedCharacterResource),
                             contentDescription = null,
@@ -266,10 +382,17 @@ fun MainScreen() {
                                 .pointerInput(Unit) {
                                     detectTapGestures(
                                         onPress = { offset ->
-                                            val press = androidx.compose.foundation.interaction.PressInteraction.Press(offset)
+                                            val press =
+                                                androidx.compose.foundation.interaction.PressInteraction.Press(
+                                                    offset
+                                                )
                                             characterInteractionSource.emit(press)
                                             tryAwaitRelease()
-                                            characterInteractionSource.emit(androidx.compose.foundation.interaction.PressInteraction.Release(press))
+                                            characterInteractionSource.emit(
+                                                androidx.compose.foundation.interaction.PressInteraction.Release(
+                                                    press
+                                                )
+                                            )
                                         },
                                         onTap = { offset ->
                                             // 1. Логика игры
@@ -494,7 +617,7 @@ fun MainScreen() {
                         // --- МЕНЮ ---
                         Column(
                             modifier = Modifier
-                                .width(160.dp)
+                                .width(180.dp)
                                 .fillMaxHeight()
                                 .background(Color.Black.copy(alpha = 0.2f))
                                 .padding(top = 20.dp, start = 16.dp, end = 16.dp),
@@ -532,8 +655,7 @@ fun MainScreen() {
                                             onClick = { viewModel.onShopItemClick(character) }
                                         )
                                     }
-                                }
-                                else if (state.currentScreen is MainScreenScreens.Shop.BackShop) {
+                                } else if (state.currentScreen is MainScreenScreens.Shop.BackShop) {
                                     items(state.backgroundsList) { background ->
                                         BackgroundCard(
                                             background = background,
@@ -621,8 +743,70 @@ fun MainScreen() {
                                     text = "забрать",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall
+                                    style = MaterialTheme.typography.titleMedium
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+            if (state.currentMainScreenDialog is MainScreenDialog.MainDialog.QuestsDialog) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f))
+                        .clickable { viewModel.onEvent(MainScreenPack.Event.onCloseDialog) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .fillMaxHeight(0.8f)
+                            .clickable(enabled = false) {}, // Чтобы клик по карточке не закрывал её
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF2C2C2C)),
+                        shape = MaterialTheme.shapes.large,
+                        border = BorderStroke(4.dp, Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            OutlinedText(
+                                text = "ЕЖЕДНЕВНЫЕ ЗАДАНИЯ",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                fillColor = Color(0xFFFFD600),
+                                outlineColor = Color.Black
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(state.gamerData.activeQuests) { quest ->
+                                    QuestItem(
+                                        quest = quest,
+                                        onClaim = {
+                                            viewModel.onEvent(
+                                                MainScreenPack.Event.onClaimQuest(
+                                                    quest.id
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Кнопка закрыть
+                            Button(
+                                onClick = { viewModel.onEvent(MainScreenPack.Event.onCloseDialog) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                                border = BorderStroke(2.dp, Color.Black)
+                            ) {
+                                Text("закрыть", color = Color.White, fontWeight = FontWeight.Bold)
                             }
                         }
                     }

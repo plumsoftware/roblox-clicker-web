@@ -79,7 +79,7 @@ fun CharacterItem(
 
                 Text(
                     text = character.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
@@ -89,7 +89,7 @@ fun CharacterItem(
 
             Text(
                 text = "+${formatCompactNumber(character.clickPower)} клик",
-                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont()),
+                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
                 color = Color.Green,
                 fontWeight = FontWeight.Medium,
             )
@@ -101,6 +101,7 @@ fun CharacterItem(
                         "выбран",
                         color = Color.Green,
                         fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.End
                     )
@@ -109,6 +110,7 @@ fun CharacterItem(
                         "куплено",
                         color = Color.Gray,
                         fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.End
                     )
@@ -121,7 +123,7 @@ fun CharacterItem(
                 ) {
                     Text(
                         text = formatCompactNumber(character.price),
-                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Fonts.getNumericFont()),
+                        style = MaterialTheme.typography.titleLarge.copy(fontFamily = Fonts.getNumericFont()),
                         color = Color(0xFFFFD600),
                         fontWeight = FontWeight.Medium,
                     )

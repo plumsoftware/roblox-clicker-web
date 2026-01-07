@@ -79,7 +79,7 @@ fun BackgroundCard(
 
                 Text(
                     text = background.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
@@ -90,9 +90,9 @@ fun BackgroundCard(
             // Цена или Статус
             if (background.isUnlocked) {
                 if (background.isSelected) {
-                    Text("выбран", color = Color.Green, fontWeight = FontWeight.Medium)
+                    Text("выбран", color = Color.Green, fontWeight = FontWeight.Medium, style = MaterialTheme.typography.titleMedium)
                 } else {
-                    Text("куплено", color = Color.Gray, fontWeight = FontWeight.Medium)
+                    Text("куплено", color = Color.Gray, fontWeight = FontWeight.Medium, style = MaterialTheme.typography.titleMedium)
                 }
             } else {
                 // Цена

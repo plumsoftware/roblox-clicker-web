@@ -28,5 +28,8 @@ data class GamerData(
     // Список купленных бустов
     val unlockedBoostIds: List<Int> = emptyList(),
 
-    val isMusicOn: Boolean = true
+    val isMusicOn: Boolean = true,
+
+    val lastDailyLoginDate: String = "", // Храним дату в формате "YYYY-MM-DD"
+    val activeQuests: List<Quest> = emptyList() // Текущие задания на день
 )

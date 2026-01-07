@@ -27,7 +27,7 @@ fun ShopMenuItem(
     ) {
         OutlinedText(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             fillColor = Color.White,
             outlineColor = Color.Black,

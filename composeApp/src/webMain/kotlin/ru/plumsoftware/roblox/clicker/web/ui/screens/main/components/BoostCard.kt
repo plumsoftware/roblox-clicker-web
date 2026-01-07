@@ -61,7 +61,7 @@ fun BoostCard(
                 Column {
                     Text(
                         text = boost.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
                     )
@@ -81,7 +81,7 @@ fun BoostCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 if (isUnlocked) {
-                    Text("куплено", color = Color.Green, fontWeight = FontWeight.Medium)
+                    Text("куплено", color = Color.Green, fontWeight = FontWeight.Medium, style = MaterialTheme.typography.titleMedium)
                 } else {
                     // Группируем цены в ряд (если влезают) или в колонку
                     Row(verticalAlignment = Alignment.CenterVertically) {

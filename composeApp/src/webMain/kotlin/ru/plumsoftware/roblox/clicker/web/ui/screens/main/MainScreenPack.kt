@@ -17,6 +17,9 @@ object MainScreenPack {
 
         object onClaimGemsClick : Event // Ивент нажатия на карточку с гемами
         object onCloseDialog : Event // Закрыть диалог
+
+        object onQuestsClick : Event      // Открыть окно заданий
+        data class onClaimQuest(val questId: Int) : Event // Забрать награду за задание
     }
 
     sealed interface Effect {

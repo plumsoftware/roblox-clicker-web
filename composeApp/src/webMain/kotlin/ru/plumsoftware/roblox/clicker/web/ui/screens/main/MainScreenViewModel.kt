@@ -1,5 +1,6 @@
 package ru.plumsoftware.roblox.clicker.web.ui.screens.main
 
+import androidx.compose.ui.autofill.ContentDataType.Companion.Date
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
@@ -17,9 +18,11 @@ import ru.plumsoftware.roblox.clicker.web.model.GameBoost
 import ru.plumsoftware.roblox.clicker.web.model.GameCharacter
 import ru.plumsoftware.roblox.clicker.web.model.GameConfig
 import ru.plumsoftware.roblox.clicker.web.model.GamerData
+import ru.plumsoftware.roblox.clicker.web.model.QuestType
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenDialog
 import ru.plumsoftware.roblox.clicker.web.ui.screens.main.screens_dialogs.MainScreenScreens
 import ru.plumsoftware.roblox.clicker.web.utils.AudioManager
+import ru.plumsoftware.roblox.clicker.web.utils.DateHelper
 import ru.plumsoftware.roblox.clicker.web.utils.GameLifecycle
 import ru.plumsoftware.roblox.clicker.web.ya.YandexGamesManager
 
@@ -116,10 +119,15 @@ class MainScreenViewModel : ViewModel() {
         state.update { oldState ->
             val oldData = oldState.gamerData
 
+            val updatedQuests = oldData.activeQuests.map { q ->
+                if (q.type == QuestType.BUY_ITEM) q.copy(current = (q.current + 1).coerceAtMost(q.target)) else q
+            }
+
             val newData = oldData.copy(
                 coins = oldData.coins - boost.priceCoins,
                 gems = oldData.gems - boost.priceGems,
-                unlockedBoostIds = oldData.unlockedBoostIds + boost.id
+                unlockedBoostIds = oldData.unlockedBoostIds + boost.id,
+                activeQuests = updatedQuests
             )
 
             oldState.copy(gamerData = newData)
@@ -141,8 +149,11 @@ class MainScreenViewModel : ViewModel() {
 
             // Если сохранений нет, берем дефолтный GamerData (где уже прописан ID 1)
             if (loadedData == null) {
-                loadedData = GamerData()
+                val newData = GamerData()
+                loadedData = checkAndResetDailyQuests(newData)
             } else {
+                loadedData = checkAndResetDailyQuests(loadedData)
+
                 if (loadedData.selectedSkinId == 0) {
                     loadedData = loadedData.copy(selectedSkinId = 1)
                 }
@@ -174,6 +185,41 @@ class MainScreenViewModel : ViewModel() {
             println("MainVM: Data loaded! Coins: ${loadedData.coins}")
         }.invokeOnCompletion {
             setupClickPowerForGems()
+        }
+    }
+
+    // Проверка смены дня
+    private fun checkAndResetDailyQuests(data: GamerData): GamerData {
+        val today = DateHelper.getTodayDate()
+
+        if (data.lastDailyLoginDate != today) {
+            // Новый день! Сбрасываем квесты
+            println("New Day! Resetting quests.")
+            return data.copy(
+                lastDailyLoginDate = today,
+                activeQuests = GameConfig.getDailyQuests() // Загружаем чистый список
+            )
+        }
+        return data
+    }
+
+    // --- ОБНОВЛЕНИЕ ПРОГРЕССА ЗАДАНИЙ ---
+    // Эту функцию надо вызывать везде, где происходит действие
+    private fun updateQuestProgress(type: QuestType, amount: Long = 1) {
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+
+            // Обновляем список квестов
+            val newQuests = oldData.activeQuests.map { quest ->
+                if (quest.type == type && !quest.isClaimed && quest.current < quest.target) {
+                    val newCurrent = (quest.current + amount).coerceAtMost(quest.target)
+                    quest.copy(current = newCurrent)
+                } else {
+                    quest
+                }
+            }
+
+            oldState.copy(gamerData = oldData.copy(activeQuests = newQuests))
         }
     }
 
@@ -210,11 +256,16 @@ class MainScreenViewModel : ViewModel() {
         state.update { oldState ->
             val oldData = oldState.gamerData
 
+            val updatedQuests = oldData.activeQuests.map { q ->
+                if (q.type == QuestType.BUY_ITEM) q.copy(current = (q.current + 1).coerceAtMost(q.target)) else q
+            }
+
             // Тратим ГЕМЫ
             val newData = oldData.copy(
                 gems = oldData.gems - background.price,
                 unlockedBackgroundIds = oldData.unlockedBackgroundIds + background.id,
-                selectedBackgroundId = background.id
+                selectedBackgroundId = background.id,
+                activeQuests = updatedQuests
             )
 
             oldState.copy(
@@ -273,47 +324,64 @@ class MainScreenViewModel : ViewModel() {
     }
 
     fun onMainCharacterClick() {
-
         if (!isBgMusicInitialized) {
             isBgMusicInitialized = true
-
-            // Если музыка включена в настройках - запускаем
             if (state.value.gamerData.isMusicOn) {
-                // ИСПОЛЬЗУЕМ playMusic, А НЕ playSound!
-                // Убедись, что файл Sakura-Girl-Cat-Walk-chosic.com_.mp3 лежит в src/jsMain/resources/sounds/
                 AudioManager.playMusic("Sakura-Girl-Cat-Walk-chosic.com_.mp3", volume = 0.3)
             }
         }
 
+        // Обновляем состояние
         state.update { oldState ->
             val oldData = oldState.gamerData
             val currentCharacter = GameConfig.allCharacters.find { it.id == oldData.selectedSkinId }
             val power = currentCharacter?.clickPower ?: 1
 
+            // 1. Монеты
             val newCoins = oldData.coins + power
 
-            // Логика Гемификации
+            // 2. Гемы
             var newProgress = oldData.clickProgressForGems + power
-            var newUnclaimedGems = oldData.unclaimedGems // Работаем с unclaimed
+            var newUnclaimedGems = oldData.unclaimedGems
+            var gemsCollectedJustNow = 0L // Сколько гемов получили прямо сейчас
 
-            val target =
-                if (oldState.maxClickProgressForGems > 0) oldState.maxClickProgressForGems else 100.0
+            val target = if (oldState.maxClickProgressForGems > 0) oldState.maxClickProgressForGems else 100.0
 
             if (newProgress >= target) {
-                // УРА! Гем падает в "копилку" (unclaimed), а не сразу в баланс
                 newUnclaimedGems++
-                newProgress = 0.0 // Сброс
+                gemsCollectedJustNow = 1 // Мы собрали 1 гем (в копилку)
+                newProgress = 0.0
+            }
+
+            // 3. Обновляем Квесты
+            val updatedQuests = oldData.activeQuests.map { q ->
+                when(q.type) {
+                    QuestType.CLICKS -> q.copy(current = (q.current + 1).coerceAtMost(q.target))
+
+                    // ДОБАВЛЕНО: Обновляем квест на монеты
+                    QuestType.EARN_COINS -> q.copy(current = (q.current + power).coerceAtMost(q.target))
+
+                    // ИСПРАВЛЕНО: Обновляем квест на гемы, если мы их получили
+                    QuestType.COLLECT_GEMS -> {
+                        if (gemsCollectedJustNow > 0) {
+                            q.copy(current = (q.current + gemsCollectedJustNow).coerceAtMost(q.target))
+                        } else {
+                            q
+                        }
+                    }
+                    else -> q
+                }
             }
 
             val newData = oldData.copy(
                 coins = newCoins,
-                unclaimedGems = newUnclaimedGems, // Обновляем копилку
-                clickProgressForGems = newProgress
+                unclaimedGems = newUnclaimedGems,
+                clickProgressForGems = newProgress,
+                activeQuests = updatedQuests // Сохраняем обновленные квесты
             )
 
-            // Сложность пересчитываем от СУММЫ (имеющиеся + в копилке), чтобы не абузили
+            // Пересчет цели
             val totalGems = oldData.gems + newUnclaimedGems
-
             val newMaxProgress = if (newUnclaimedGems > oldData.unclaimedGems) {
                 calculateTarget(power, totalGems)
             } else {
@@ -325,9 +393,42 @@ class MainScreenViewModel : ViewModel() {
                 maxClickProgressForGems = newMaxProgress
             )
         }
+
         if (state.value.isSoundOn) {
             AudioManager.playSound("minecraft-click.mp3")
         }
+    }
+
+    // --- ПОЛУЧЕНИЕ НАГРАДЫ ЗА КВЕСТ ---
+    private fun claimQuestReward(questId: Int) {
+        state.update { oldState ->
+            val oldData = oldState.gamerData
+            val quest = oldData.activeQuests.find { it.id == questId } ?: return@update oldState
+
+            if (quest.current >= quest.target && !quest.isClaimed) {
+                // Выдаем награду
+                val newCoins = oldData.coins + quest.rewardCoins
+                val newGems = oldData.gems + quest.rewardGems
+
+                // Помечаем как забрано
+                val newQuests = oldData.activeQuests.map {
+                    if (it.id == questId) it.copy(isClaimed = true) else it
+                }
+
+                AudioManager.playSound("buy-1.mp3") // Звук успеха
+
+                oldState.copy(
+                    gamerData = oldData.copy(
+                        coins = newCoins,
+                        gems = newGems,
+                        activeQuests = newQuests
+                    )
+                )
+            } else {
+                oldState
+            }
+        }
+        saveGameImmediately()
     }
 
     // --- ЛОГИКА СБОРА ГЕМОВ ---
@@ -382,13 +483,18 @@ class MainScreenViewModel : ViewModel() {
         state.update { oldState ->
             val oldData = oldState.gamerData
 
+            val updatedQuests = oldData.activeQuests.map { q ->
+                if (q.type == QuestType.BUY_ITEM) q.copy(current = (q.current + 1).coerceAtMost(q.target)) else q
+            }
+
             // 1. Списываем деньги
             // 2. Добавляем ID в список купленных
             // 3. Ставим ID как выбранный
             val newData = oldData.copy(
                 coins = oldData.coins - character.price,
                 unlockedCharacterIds = oldData.unlockedCharacterIds + character.id,
-                selectedSkinId = character.id
+                selectedSkinId = character.id,
+                activeQuests = updatedQuests
             )
 
             oldState.copy(
@@ -517,6 +623,13 @@ class MainScreenViewModel : ViewModel() {
             is MainScreenPack.Event.onClaimGemsClick -> claimGems() // Нажали на карточку
 
             is MainScreenPack.Event.onCloseDialog -> closeDialog()  // Нажали "Забрать" в диалоге
+
+            is MainScreenPack.Event.onQuestsClick -> {
+                state.update { it.copy(currentMainScreenDialog = MainScreenDialog.MainDialog.QuestsDialog) }
+            }
+            is MainScreenPack.Event.onClaimQuest -> {
+                claimQuestReward(event.questId)
+            }
         }
     }
 

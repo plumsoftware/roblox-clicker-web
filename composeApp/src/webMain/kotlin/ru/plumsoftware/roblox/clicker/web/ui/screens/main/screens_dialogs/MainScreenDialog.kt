@@ -6,5 +6,6 @@ sealed interface MainScreenDialog {
     sealed interface MainDialog : MainScreenDialog {
         class SettingsDialog : MainDialog
         data class ClaimGemsDialog(val amount: Long) : MainDialog
+        object QuestsDialog : MainDialog
     }
 }

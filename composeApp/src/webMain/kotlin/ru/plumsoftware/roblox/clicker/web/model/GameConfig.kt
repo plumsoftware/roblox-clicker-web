@@ -301,4 +301,22 @@ object GameConfig {
         GameBoost(19, "рубин", Res.drawable.boost_19_v2, income = 50_000_000, priceCoins = 10_000_000_000, priceGems = 5000),
         GameBoost(20, "???", Res.drawable.boost_20, income = 150_000_000, priceCoins = 100_000_000_000, priceGems = 10000)
     )
+
+    fun getDailyQuests(): List<Quest> = listOf(
+        // Легкие (Монеты)
+        Quest(1, "100 кликов", QuestType.CLICKS, target = 100, rewardCoins = 100),
+        Quest(2, "1К монет", QuestType.EARN_COINS, target = 1000, rewardCoins = 500),
+        Quest(3, "Купи 1 улучшение", QuestType.BUY_ITEM, target = 1, rewardGems = 1),
+
+        // Средние
+        Quest(4, "1К кликов", QuestType.CLICKS, target = 1000, rewardCoins = 1500),
+        Quest(5, "50К монет", QuestType.EARN_COINS, target = 50000, rewardCoins = 2500),
+        Quest(6, "1 гем", QuestType.COLLECT_GEMS, target = 1, rewardCoins = 150),
+        Quest(7, "Купи 3 улучшения", QuestType.BUY_ITEM, target = 3, rewardCoins = 5000),
+
+        // Сложные (За Гемы)
+        Quest(8, "50К кликов", QuestType.CLICKS, target = 5000, rewardGems = 1),
+        Quest(9, "10М монет", QuestType.EARN_COINS, target = 1_000_000, rewardGems = 2),
+        Quest(10, "10 гемов", QuestType.COLLECT_GEMS, target = 10, rewardGems = 3)
+    )
 }
