@@ -207,7 +207,7 @@ fun MainScreen() {
                                     ) {
                                         OutlinedText(
                                             text = "задания",
-                                            style = MaterialTheme.typography.titleMedium,
+                                            style = MaterialTheme.typography.titleSmall,
                                             fontWeight = FontWeight.Black,
                                             fillColor = Color.White,
                                             outlineColor = Color.Black,
@@ -267,7 +267,7 @@ fun MainScreen() {
                                 ) {
                                     OutlinedText(
                                         text = if (state.gamerData.isMusicOn) "звук: вкл" else "звук: выкл",
-                                        style = MaterialTheme.typography.titleMedium,
+                                        style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         fillColor = if (state.gamerData.isMusicOn) Color(0xFF00E676) else Color(
                                             0xFFFF1744
@@ -303,7 +303,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.coins),
-                                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF7D6608),
                                 )
@@ -334,7 +334,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.gems),
-                                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0277BD),
                                 )
