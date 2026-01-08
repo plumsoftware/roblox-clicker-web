@@ -201,13 +201,13 @@ fun MainScreen() {
                                 ) {
                                     Box(
                                         modifier = Modifier.padding(
-                                            horizontal = 20.dp,
+                                            horizontal = 12.dp,
                                             vertical = 12.dp
                                         )
                                     ) {
                                         OutlinedText(
                                             text = "задания",
-                                            style = MaterialTheme.typography.titleLarge,
+                                            style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Black,
                                             fillColor = Color.White,
                                             outlineColor = Color.Black,
@@ -303,7 +303,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.coins),
-                                    style = MaterialTheme.typography.headlineLarge.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF7D6608),
                                 )
@@ -334,7 +334,7 @@ fun MainScreen() {
 
                                 Text(
                                     text = formatCompactNumber(state.gamerData.gems),
-                                    style = MaterialTheme.typography.headlineLarge.copy(fontFamily = getNumericFont()),
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = getNumericFont()),
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0277BD),
                                 )
